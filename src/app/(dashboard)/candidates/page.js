@@ -1,5 +1,5 @@
 'use client';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import CandidateTable from './components/CandidateTable';
 import CandidateModal from './components/CandidateModal';
@@ -12,6 +12,8 @@ export default function Candidates() {
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
   const [showForm, setShowForm] = useState(false);
+  const [isParsing, setIsParsing] = useState(false);
+  const fileInputRef = useRef(null);
   const [selectedCandidate, setSelectedCandidate] = useState(null);
   const [reviews, setReviews] = useState([]);
   const [newReview, setNewReview] = useState('');
@@ -107,6 +109,37 @@ export default function Candidates() {
     ) {
       await fetch(`/api/candidates/${id}`, { method: 'DELETE' });
       fetchData();
+    }
+  };
+
+  const handleFileUpload = async e => {
+    const file = e.target.files[0];
+    if (!file) return;
+
+    setIsParsing(true);
+    const formDataObj = new FormData();
+    formDataObj.append('resume', file);
+
+    try {
+      const res = await fetch('/api/parse-resume', {
+        method: 'POST',
+        body: formDataObj
+      });
+      const data = await res.json();
+      if (data.success) {
+        setFormData(prev => ({
+          ...prev,
+          ...data.data,
+          experience_years: parseInt(data.data.experience_years) || 0
+        }));
+      } else {
+        alert('Error parsing resume: ' + data.error);
+      }
+    } catch (err) {
+      alert('Error parsing resume.');
+    } finally {
+      setIsParsing(false);
+      e.target.value = null;
     }
   };
 
@@ -423,21 +456,49 @@ export default function Candidates() {
               }}
             />
           </div>
-          <button
-            type="submit"
-            style={{
-              background: 'var(--success)',
-              color: 'white',
-              padding: '1rem',
-              border: 'none',
-              borderRadius: '0.25rem',
-              cursor: 'pointer',
-              fontWeight: 'bold',
-              fontSize: '1rem'
-            }}
+          <div
+            style={{ display: 'flex', flexDirection: 'column', gap: '1rem', marginTop: '0.5rem' }}
           >
-            Save Candidate
-          </button>
+            <input
+              type="file"
+              accept=".pdf,.doc,.docx,.txt"
+              ref={fileInputRef}
+              style={{ display: 'none' }}
+              onChange={handleFileUpload}
+            />
+            <button
+              type="button"
+              onClick={() => fileInputRef.current?.click()}
+              disabled={isParsing}
+              style={{
+                background: 'linear-gradient(135deg, #c084fc, #f472b6)',
+                color: 'white',
+                padding: '1rem',
+                border: 'none',
+                borderRadius: '0.25rem',
+                cursor: isParsing ? 'not-allowed' : 'pointer',
+                fontWeight: 'bold',
+                fontSize: '1rem'
+              }}
+            >
+              {isParsing ? '✨ Analyzing Resume...' : '✨ Magic Auto-Fill & Resume Parse'}
+            </button>
+            <button
+              type="submit"
+              style={{
+                background: 'var(--success)',
+                color: 'white',
+                padding: '1rem',
+                border: 'none',
+                borderRadius: '0.25rem',
+                cursor: 'pointer',
+                fontWeight: 'bold',
+                fontSize: '1rem'
+              }}
+            >
+              Save Candidate
+            </button>
+          </div>
         </form>
       )}
 

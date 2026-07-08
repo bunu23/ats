@@ -5,10 +5,32 @@ import {
   updateApplicationStage,
   addActivityLog,
   getAndClearPendingTasks,
-  removeDelayedTasksByApplication
+  removeDelayedTasksByApplication,
+  getSettings
 } from './src/lib/db.js';
 
 console.log('Background worker started. Monitoring SLAs, delayed tasks, and time-based rules...');
+
+async function sendCourteousRejection(app, reason) {
+  await updateApplicationStage(app.id, 'Rejected', 'system', reason);
+  await addActivityLog({
+    type: 'stage_change',
+    title: `Auto-Rejected (Stale): ${app.candidate_name}`,
+    description: `Candidate automatically rejected: ${reason}`,
+    application_id: app.id,
+    job_id: app.job_id,
+    candidate_id: app.candidate_id
+  });
+  await addActivityLog({
+    type: 'email_sent',
+    title: `Application Update: ${app.job_title}`,
+    description: `Dear ${app.candidate_name},\n\nThank you for your time and patience during our process. After careful consideration, we have decided to move forward with other candidates whose profiles more closely align with our current needs for the ${app.job_title} position.\n\nWe appreciate the time you took to speak with our team and wish you the absolute best in your career search.`,
+    metadata: { to: app.candidate_email, automated: true },
+    application_id: app.id,
+    job_id: app.job_id,
+    candidate_id: app.candidate_id
+  });
+}
 
 setInterval(async () => {
   const now = new Date();
@@ -59,6 +81,11 @@ setInterval(async () => {
 
   // 2. Process SLAs and Time-Based Application Rules
   const applications = await getAllApplications();
+  const settings = await getSettings();
+
+  const autoRejectApplied = settings.recruiter_settings?.autoRejectApplied || 14;
+  const autoRejectScreening = settings.recruiter_settings?.autoRejectScreening || 5;
+  const autoRejectInterview = settings.recruiter_settings?.autoRejectInterview || 14;
 
   for (const app of applications) {
     if (app.stage === 'Hired' || app.stage === 'Rejected' || app.withdrawn) {
@@ -112,35 +139,45 @@ setInterval(async () => {
       }
     }
 
-    // Auto-Reject Applied > 14 days
-    if (app.stage === 'Applied' && daysInStage > 14) {
-      await updateApplicationStage(app.id, 'Rejected', 'system', 'Auto-rejected after 14 days');
-      await addActivityLog({
-        type: 'stage_change',
-        title: `Auto-Rejected: ${app.candidate_name}`,
-        description: `Candidate automatically rejected for sitting in Applied stage > 14 days.`,
-        application_id: app.id,
-        job_id: app.job_id,
-        candidate_id: app.candidate_id
-      });
+    // 1. Auto-Reject Applied
+    if (app.stage === 'Applied' && daysInStage > autoRejectApplied) {
+      await sendCourteousRejection(
+        app,
+        `Stagnated in Applied stage for > ${autoRejectApplied} days.`
+      );
     }
 
-    // Auto-Reject Screening > 3 days
-    if (app.stage === 'Screening' && daysInStage > 3) {
-      await updateApplicationStage(
-        app.id,
-        'Rejected',
-        'system',
-        'Auto-rejected after 3 days in Screening'
+    // 2. Auto-Reject Screening
+    if (app.stage === 'Screening' && daysInStage > autoRejectScreening) {
+      await sendCourteousRejection(
+        app,
+        `Stagnated in Screening stage for > ${autoRejectScreening} days.`
       );
-      await addActivityLog({
-        type: 'stage_change',
-        title: `Auto-Rejected: ${app.candidate_name}`,
-        description: `Candidate automatically rejected for sitting in Screening stage > 3 days.`,
-        application_id: app.id,
-        job_id: app.job_id,
-        candidate_id: app.candidate_id
-      });
+    }
+
+    // 3. Auto-Reject Interview (The "Stale Sweeper")
+    if (app.stage === 'Interview' && daysInStage > autoRejectInterview) {
+      await sendCourteousRejection(
+        app,
+        `Stagnated in Interview loop for > ${autoRejectInterview} days without an update.`
+      );
+    }
+
+    // Phase 5: Offer Expiration Reminder (Gentle nudge 48 hours before expiration)
+    if (app.stage === 'Offer' && !app.offer_reminder_sent) {
+      const offerSla = slaLimit || 5; // Default 5 days expiration
+      if (daysInStage >= offerSla - 2 && daysInStage > 0) {
+        await updateApplicationData(app.id, { offer_reminder_sent: true });
+        await addActivityLog({
+          type: 'email_sent',
+          title: `Offer Expiration Reminder: ${app.candidate_name}`,
+          description: `Dear ${app.candidate_name},\n\nWe are so excited about the prospect of you joining us! This is a gentle reminder that your offer for the ${app.job_title} role will expire in approximately 48 hours. Please don't hesitate to reach out if you have any final questions or need to schedule a quick chat.\n\nBest,\nThe Hiring Team`,
+          metadata: { to: app.candidate_email, automated: true },
+          application_id: app.id,
+          job_id: app.job_id,
+          candidate_id: app.candidate_id
+        });
+      }
     }
 
     // Phase 2 & 3: Interview Reminders & Post-Interview Feedback

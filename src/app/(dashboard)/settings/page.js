@@ -232,7 +232,10 @@ export default function Settings() {
             Manual Templates
           </option>
           <option value="recruiter" style={{ color: 'black' }}>
-            Recruiter Profile (Calendly Link)
+            Recruiter Profile
+          </option>
+          <option value="sla" style={{ color: 'black' }}>
+            SLA & Auto-Rejection
           </option>
         </select>
       </div>
@@ -278,6 +281,75 @@ export default function Settings() {
                   color: 'white'
                 }}
               />
+            </div>
+          </section>
+        )}
+
+        {/* SLA & Auto Rejection */}
+        {activeTab === 'sla' && (
+          <section>
+            <h2
+              style={{
+                borderBottom: '1px solid rgba(255,255,255,0.1)',
+                paddingBottom: '0.5rem',
+                marginBottom: '1.5rem'
+              }}
+            >
+              SLA & Auto-Rejection Sweeper
+            </h2>
+            <div
+              className="glass-card"
+              style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}
+            >
+              <p style={{ color: 'var(--text-secondary)', fontSize: '0.875rem', margin: 0 }}>
+                Configure the maximum number of days a candidate can stay in a specific stage before
+                the system automatically rejects them and sends a courteous rejection email.
+              </p>
+
+              <div>
+                <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: 600 }}>
+                  Applied Stage Timeout (Days)
+                </label>
+                <input
+                  type="number"
+                  min="1"
+                  value={settings.recruiter_settings?.autoRejectApplied || 14}
+                  onChange={e =>
+                    updateRecruiterSetting('autoRejectApplied', parseInt(e.target.value) || 14)
+                  }
+                  style={{ width: '100px', padding: '0.5rem', borderRadius: '0.25rem' }}
+                />
+              </div>
+
+              <div>
+                <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: 600 }}>
+                  Screening Stage Timeout (Days)
+                </label>
+                <input
+                  type="number"
+                  min="1"
+                  value={settings.recruiter_settings?.autoRejectScreening || 5}
+                  onChange={e =>
+                    updateRecruiterSetting('autoRejectScreening', parseInt(e.target.value) || 5)
+                  }
+                  style={{ width: '100px', padding: '0.5rem', borderRadius: '0.25rem' }}
+                />
+              </div>
+
+              <div>
+                <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: 600 }}>
+                  Interview Stage Timeout (Days)
+                </label>
+                <input
+                  type="number"
+                  min="1"
+                  value={settings.recruiter_settings?.autoRejectInterview || 14}
+                  onChange={e =>
+                    updateRecruiterSetting('autoRejectInterview', parseInt(e.target.value) || 14)
+                  }
+                  style={{ width: '100px', padding: '0.5rem', borderRadius: '0.25rem' }}
+                />
+              </div>
             </div>
           </section>
         )}
