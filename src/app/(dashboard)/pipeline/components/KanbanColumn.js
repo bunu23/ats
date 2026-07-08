@@ -6,7 +6,8 @@ export default function KanbanColumn({
   handleDragOver,
   handleDrop,
   handleDragStart,
-  updateInterviewDate
+  updateInterviewDate,
+  moveApplication
 }) {
   const stageApps = applications.filter(a => a.stage === stage);
 
@@ -27,6 +28,7 @@ export default function KanbanColumn({
             stage={stage}
             handleDragStart={handleDragStart}
             updateInterviewDate={updateInterviewDate}
+            moveApplication={moveApplication}
           />
         ))}
       </div>

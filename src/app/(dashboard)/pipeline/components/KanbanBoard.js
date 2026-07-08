@@ -6,7 +6,8 @@ export default function KanbanBoard({
   handleDragOver,
   handleDrop,
   handleDragStart,
-  updateInterviewDate
+  updateInterviewDate,
+  moveApplication
 }) {
   return (
     <div className="kanban-board">
@@ -19,6 +20,7 @@ export default function KanbanBoard({
           handleDrop={handleDrop}
           handleDragStart={handleDragStart}
           updateInterviewDate={updateInterviewDate}
+          moveApplication={moveApplication}
         />
       ))}
     </div>

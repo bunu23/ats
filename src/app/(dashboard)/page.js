@@ -9,27 +9,33 @@ export default function Dashboard() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    // Fetch global stats
-    fetch('/api/dashboard')
-      .then(res => res.json())
-      .then(data => {
-        if (data.success) setStats(data.data);
-      });
+    const fetchData = () => {
+      // Fetch global stats
+      fetch('/api/dashboard')
+        .then(res => res.json())
+        .then(data => {
+          if (data.success) setStats(data.data);
+        });
 
-    // Fetch jobs for dropdown
-    fetch('/api/jobs')
-      .then(res => res.json())
-      .then(data => {
-        if (data.success) setJobs(data.data);
-      });
+      // Fetch jobs for dropdown
+      fetch('/api/jobs')
+        .then(res => res.json())
+        .then(data => {
+          if (data.success) setJobs(data.data);
+        });
 
-    // Fetch applications for funnel
-    fetch('/api/applications')
-      .then(res => res.json())
-      .then(data => {
-        if (data.success) setApplications(data.data);
-        setLoading(false);
-      });
+      // Fetch applications for funnel
+      fetch('/api/applications')
+        .then(res => res.json())
+        .then(data => {
+          if (data.success) setApplications(data.data);
+          setLoading(false);
+        });
+    };
+
+    fetchData();
+    const interval = setInterval(fetchData, 10000);
+    return () => clearInterval(interval);
   }, []);
 
   if (loading || !stats) return <div>Loading dashboard...</div>;

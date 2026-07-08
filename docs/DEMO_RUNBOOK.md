@@ -1,73 +1,109 @@
-# ATS Demo Script & Runbook
+# 🚀 ATS Demo Script & Runbook
 
-Welcome to the Applicant Tracking System! This runbook is designed to guide you through a flawless demonstration of the platform's core capabilities, specifically highlighting the autonomous AI features.
+Welcome to the **Next-Gen Applicant Tracking System**! This runbook is your ultimate guide to executing a flawless, wow-inducing demonstration of the platform's autonomous AI capabilities, custom pipelines, and beautiful glassmorphic UI.
 
 ---
 
-## Part 1: Quick Start Configuration
+## 🛠️ Part 1: Quick Start & Configuration
 
 ### 1. Booting the System
 
-You can start the system locally or via Docker. For the smoothest demo, Docker is recommended.
+You can run the system locally using Node.js or via Docker. To start the local Next.js dev server along with the background automation worker:
 
 ```bash
-docker compose up -d
+npm run dev
 ```
 
-Navigate to **`http://localhost:3000`** in your browser.
+Navigate to **`http://localhost:3000`** in your browser to enter the Recruiter Dashboard.
 
-### 2. Enabling Real AI (Optional but Recommended)
+### 2. Enabling Real AI (Optional but Highly Recommended)
 
-By default, the ATS runs in `mock` mode to save API credits. To show real AI resume scoring:
+By default, the ATS runs in `mock` mode to save API credits. To demonstrate the real AI resume scoring and email generation:
 
 1. Open `.env.local`
 2. Change `AI_PROVIDER=mock` to `AI_PROVIDER=claude`
-3. Add your key: `ANTHROPIC_API_KEY=sk-ant-api03...`
-4. Restart the servers/containers.
+3. Add your Anthropic Key: `ANTHROPIC_API_KEY=sk-ant-...`
+4. Restart the server.
 
 ---
 
-## Part 2: The Walkthrough
+## 🎬 Part 2: The End-to-End Candidate Journey Walkthrough
 
-### Step 1: Creating a Custom Job Requisition
+This section walks you through the complete lifecycle of a candidate—from the second they apply, to the moment the position is closed.
 
-- **Action:** Click on "Jobs" in the sidebar, then click "Create Job".
-- **Talking Point:** "Notice how we aren't locked into a global pipeline. For a Senior Developer role, we can add a custom 'Technical Assessment' stage right between Phone Screening and Interview."
-- **Action:** Fill out the form, add your custom stages, and save.
-
-### Step 2: Configuring the Automation Rules
-
-- **Action:** Click on "Email Templates" in the sidebar.
-- **Talking Point:** "Here is where the recruiter configures the exact messaging they want the AI to send on their behalf."
-- **Action:** Show the dropdown toggling between "Automated Templates" and "Manual Templates". Enter a fake Calendly link in the "Recruiter Profile" section so the dynamic `{{calendly_link}}` variable populates.
-
-### Step 3: Simulating a Candidate Application
+### Step 1: 📝 The Magic Application (Careers Page)
 
 - **Action:** Open an Incognito window and navigate to `http://localhost:3000/careers`.
-- **Talking Point:** "This is the public portal. Watch what happens when a candidate applies."
-- **Action:** Fill out the application. Use a resume description that perfectly matches the job you created.
-- **Behind the Scenes:** As soon as you hit submit, the API hits the Anthropic AI. It scores the resume and logs the "Instant Confirmation" email to the Activity log.
+- **The Hook:** Click on any Open Job. Demonstrate the **"Magic Auto-Fill"** feature.
+- **Talking Point:** _"Notice the glowing cyan box at the top? When a candidate uploads their resume, our AI instantly parses their document and maps it to our structured fields. It eliminates the dreaded 'upload your resume and then type it all out again' problem."_
+- **Action:** Click the "Simulate AI Parse" button to watch the form magically populate, then hit submit!
 
-### Step 4: The Kanban Board (Triggering the Engine)
+### Step 2: 🤖 Instant AI Screening (Behind the Scenes)
 
-- **Action:** Go back to your recruiter window and click "Pipeline". Select the job you just applied for from the dropdown.
-- **Talking Point:** "The candidate is sitting in 'Applied' with a high AI score. Let's move them to Phone Screening."
-- **Action:** Drag and drop the candidate card into the "Phone Screening" column.
-- **Behind the Scenes:** You will immediately trigger the Rules Engine. The engine detects the stage change, queries the database for active rules, and automatically dispatches the `phone_screening_invite` email template containing your Calendly link.
-- **Action (Testing Guardrails):** Try to drag a candidate _backwards_ into a previous stage. The UI will instantly block the action, enforcing forward-only progression.
+- **What Happens:** The moment the candidate submits, the application routes to `/api/apply`.
+- **The Automation:** The **Automation Engine** wakes up in the background. It evaluates the resume against the custom job description and generates a score out of 100 with detailed reasoning.
+- **Talking Point:** _"Before the recruiter even refreshes their page, the AI has already read the resume, scored it for fit, and placed the candidate in the 'Applied' pipeline stage."_
 
-### Step 5: Validating the Activity Log
+### Step 3: 📞 Phone Screening & Autonomous Outreach
 
-- **Action:** Click "Activity & Emails" in the sidebar.
-- **Talking Point:** "We don't want AI operating in a black box. Complete transparency is critical."
-- **Action:** Click on the "Candidate Applied" row to expand the accordion and reveal the exact AI Score and the AI's paragraph explaining _why_ it gave that score. Next, click the "Email Sent" row to prove the phone screening invite was dispatched with the correct variables injected.
+- **Action:** Back in the Recruiter Dashboard, open the **Pipeline** tab.
+- **Action:** Grab the newly applied candidate card and drag it into the **"Phone Screening"** column.
+- **The Hook:** _"Watch what happens when I drop this card. The system detects the stage change and triggers an autonomous background rule."_
+- **What Happens:** The system immediately drafts and sends a personalized "Phone Screening Invite" email to the candidate, injecting your Calendly link!
+
+### Step 4: 📅 The Interview Stage & Guardrails
+
+- **Action:** Drag the candidate from Phone Screening into **"Interview"**.
+- **The Hook:** Mention the background **Delayed Tasks Engine**.
+- **Talking Point:** _"When candidates enter the Interview stage, our system schedules a delayed background task. Exactly 2 hours after their scheduled interview, they will automatically receive a personalized 'Thank You' note. If they sit in this stage too long, our SLAs will escalate their priority to 'Urgent'!"_
+
+### Step 5: 🤝 The Offer & Background Check Simulation
+
+- **Action:** Drag the candidate into the **"Offer"** column.
+- **The Hook:** Unlike previous stages, no automated emails go out here.
+- **Talking Point:** _"Notice that the system didn't send an automated email? We have a strict 'Phase 5 Guardrail' built in. Offers and final rejections require human intervention. We don't want AI accidentally offering someone a job!"_
+- **Action:** Click the **"Simulate Signature"** button directly on their Kanban card to manually push them to the **"Background Check"** stage.
+
+### Step 6: 🎉 Hired! Closing the Loop
+
+- **Action:** In the Background Check column, click the **"Verify & Hire"** button on the candidate's card.
+- **What Happens:** The candidate is moved to **"Hired"**!
+- **Talking Point:** _"The candidate is officially hired. But our system goes one step further. If you go back to the 'Jobs' dashboard, you'll see this requisition has been automatically marked as 'Closed' because the headcount was fulfilled."_
 
 ---
 
-## Troubleshooting & Resetting
+## 🔎 Part 3: Stakeholder Review & Audit Trails
 
-If you want to run the demo again from a clean slate:
+To prove that the AI isn't operating in a "black box," you can show stakeholders exactly how to review the system's decisions.
 
-1. Stop the application.
-2. Delete the `data/ats-data.json` file.
-3. Restart the application. It will automatically re-seed itself with default clean data on the next boot!
+### 1. 🎛️ Mission Control (Activity & Emails)
+
+- **Action:** Click the **"Activity & Emails"** tab in the sidebar.
+- **The Hook:** Show off the beautiful two-column dashboard.
+- **Talking Point:** _"This is Mission Control. Instead of annoying popup toasts, all background AI operations are quietly logged here."_
+- **Demo:**
+  - Expand the **Automated Actions** accordion to show the raw AI Score and evaluation paragraph generated during Step 2.
+  - Expand the **AI-Generated Emails** accordion to prove the system sent the Phone Screen invite.
+  - Point out the glowing red **High Priority Alerts** box on the right, which catches SLA breaches and simulated Slack Webhooks.
+
+### 2. 🗂️ Candidate Command Center
+
+- **Action:** Go to the **Candidates** tab and click the **"📁 Profile"** button on any candidate.
+- **The Hook:** This modal gives stakeholders a complete 360-degree view of a candidate.
+- **Demo:**
+  - Point out the **Right Column Audit Log**. Show how every single stage movement is tracked and permanently tagged by whether a **HUMAN**, **SYSTEM**, or **AI AGENT** triggered it.
+  - Show the **Interviewer Reviews Hub**, where team members can drop their notes for hiring managers to review.
+
+---
+
+## 🧹 Troubleshooting & Resetting
+
+If you want to run the demo again from a perfectly clean slate:
+
+1. Stop the application server (`Ctrl + C`).
+2. Delete the local SQLite database file: `rm prisma/dev.db`
+3. Push the Prisma schema to generate a fresh database:
+   ```bash
+   npx prisma db push
+   ```
+4. Restart the application (`npm run dev`). The system will automatically detect the empty database and run the `seed.js` script to populate a fresh set of dummy jobs and candidates!

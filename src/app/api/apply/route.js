@@ -15,7 +15,7 @@ export async function POST(request) {
       );
     }
 
-    const job = db.getJobById(job_id);
+    const job = await db.getJobById(job_id);
     if (!job || job.status !== 'Open') {
       return NextResponse.json(
         { success: false, error: 'Job is not open for applications' },
@@ -24,9 +24,9 @@ export async function POST(request) {
     }
 
     // 1. Find or Create Candidate
-    let candidate = db.getCandidateByEmail(email);
+    let candidate = await db.getCandidateByEmail(email);
     if (!candidate) {
-      candidate = db.createCandidate({
+      candidate = await db.createCandidate({
         name,
         email,
         phone,
@@ -42,7 +42,7 @@ export async function POST(request) {
       job.custom_stages && job.custom_stages.length > 0
         ? job.custom_stages[0]
         : db.PIPELINE_STAGES[0];
-    const application = db.createApplication({
+    const application = await db.createApplication({
       job_id,
       candidate_id: candidate.id,
       stage: firstStage,

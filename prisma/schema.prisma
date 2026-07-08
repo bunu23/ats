@@ -1,0 +1,113 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = "file:./dev.db"
+}
+
+model User {
+  id       String @id @default(uuid())
+  email    String @unique
+  password String
+  name     String
+  role     String
+}
+
+model Job {
+  id             String    @id @default(uuid())
+  title          String
+  department     String
+  location       String
+  type           String    @default("Full-time")
+  description    String
+  requirements   String
+  salary_range   String?
+  status         String    @default("Open")
+  custom_stages  String
+  slas           String
+  expires_at     DateTime?
+  closed_at      DateTime?
+  created_at     DateTime  @default(now())
+  updated_at     DateTime  @updatedAt
+}
+
+model Candidate {
+  id               String   @id @default(uuid())
+  name             String
+  email            String   @unique
+  phone            String?
+  resume_text      String?
+  skills           String?
+  experience_years Int      @default(0)
+  education        String?
+  notes            String?
+  created_at       DateTime @default(now())
+  updated_at       DateTime @updatedAt
+}
+
+model Application {
+  id               String    @id @default(uuid())
+  job_id           String
+  candidate_id     String
+  stage            String    @default("Applied")
+  stage_entered_at DateTime  @default(now())
+  priority         String    @default("Normal")
+  withdrawn        Boolean   @default(false)
+  interview_date   DateTime?
+  ai_score         Int?
+  ai_evaluation    String?
+  notes            String?
+  created_at       DateTime  @default(now())
+  updated_at       DateTime  @updatedAt
+}
+
+model StageHistory {
+  id             String   @id @default(uuid())
+  application_id String
+  from_stage     String?
+  to_stage       String
+  changed_by     String   @default("system")
+  notes          String?
+  created_at     DateTime @default(now())
+}
+
+model ActivityLog {
+  id             String   @id @default(uuid())
+  type           String
+  title          String
+  description    String?
+  metadata       String?
+  application_id String?
+  job_id         String?
+  candidate_id   String?
+  created_at     DateTime @default(now())
+}
+
+model AutomationRule {
+  id             String   @id @default(uuid())
+  name           String
+  description    String?
+  trigger_type   String
+  trigger_config String
+  action_type    String
+  action_config  String
+  enabled        Boolean  @default(true)
+  created_at     DateTime @default(now())
+  updated_at     DateTime @updatedAt
+}
+
+model DelayedTask {
+  id         String   @id @default(uuid())
+  type       String
+  execute_at DateTime
+  payload        String
+  created_at DateTime @default(now())
+}
+
+model Settings {
+  id                 String @id @default(uuid())
+  email_templates    String
+  recruiter_settings String
+}

@@ -10,7 +10,7 @@ export async function PATCH(request, { params }) {
     const { id } = await params;
     const { stage, interview_date } = await request.json();
 
-    const application = db.getApplicationById(id);
+    const application = await db.getApplicationById(id);
     if (!application) {
       return NextResponse.json({ success: false, error: 'Application not found' }, { status: 404 });
     }
@@ -19,13 +19,13 @@ export async function PATCH(request, { params }) {
 
     if (stage && application.stage !== stage) {
       const oldStage = application.stage;
-      updatedApplication = db.updateApplicationStage(id, stage);
+      updatedApplication = await db.updateApplicationStage(id, stage);
       // Trigger automation asynchronously
-      processStageChange(db, id, oldStage, stage).catch(console.error);
+      await processStageChange(db, id, oldStage, stage).catch(console.error);
     }
 
     if (interview_date !== undefined) {
-      updatedApplication = db.updateApplicationData(id, { interview_date });
+      updatedApplication = await db.updateApplicationData(id, { interview_date });
       // Schedule reminders synchronously or asynchronously
       scheduleInterviewReminders(db, updatedApplication, interview_date);
     }

@@ -13,7 +13,7 @@ export async function POST(request) {
       );
     }
 
-    const application = getApplicationById(applicationId);
+    const application = await getApplicationById(applicationId);
     if (!application) {
       return NextResponse.json({ success: false, error: 'Application not found' }, { status: 404 });
     }
@@ -21,14 +21,14 @@ export async function POST(request) {
     const score = await scoreCandidate(application, application);
 
     // Save the score
-    const updatedApplication = updateApplicationScore(
+    const updatedApplication = await updateApplicationScore(
       applicationId,
       score.overallScore,
       JSON.stringify(score)
     );
 
     // Log the manual scoring action
-    addActivityLog({
+    await addActivityLog({
       type: 'ai_scoring',
       title: `Manual AI Score: ${application.candidate_name} — ${score.overallScore}/10`,
       description: score.recommendation,

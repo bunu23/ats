@@ -1,6 +1,12 @@
 import React from 'react';
 
-export default function CandidateTable({ filteredCandidates, getCandidateAppInfo, openModal }) {
+export default function CandidateTable({
+  filteredCandidates,
+  getCandidateAppInfo,
+  openModal,
+  navigateToPipeline,
+  handleDeleteCandidate
+}) {
   return (
     <div
       style={{
@@ -96,6 +102,7 @@ export default function CandidateTable({ filteredCandidates, getCandidateAppInfo
               <tr
                 key={candidate.id}
                 style={{
+                  cursor: 'pointer',
                   borderBottom:
                     index !== filteredCandidates.length - 1
                       ? '1px solid rgba(255,255,255,0.05)'
@@ -103,6 +110,7 @@ export default function CandidateTable({ filteredCandidates, getCandidateAppInfo
                   transition: 'background-color 0.2s ease',
                   background: 'transparent'
                 }}
+                onClick={() => navigateToPipeline && navigateToPipeline(appInfo.job_id)}
                 onMouseOver={e => (e.currentTarget.style.background = 'rgba(255,255,255,0.03)')}
                 onMouseOut={e => (e.currentTarget.style.background = 'transparent')}
               >
@@ -204,7 +212,10 @@ export default function CandidateTable({ filteredCandidates, getCandidateAppInfo
                 </td>
                 <td style={{ padding: '1.25rem 1.5rem', textAlign: 'right' }}>
                   <button
-                    onClick={() => openModal(candidate)}
+                    onClick={e => {
+                      e.stopPropagation();
+                      openModal(candidate);
+                    }}
                     style={{
                       background: 'rgba(255,255,255,0.05)',
                       border: '1px solid rgba(255,255,255,0.1)',
@@ -217,12 +228,35 @@ export default function CandidateTable({ filteredCandidates, getCandidateAppInfo
                       transition: 'background 0.2s',
                       display: 'inline-flex',
                       alignItems: 'center',
-                      gap: '0.5rem'
+                      gap: '0.5rem',
+                      marginRight: '0.5rem'
                     }}
                     onMouseOver={e => (e.currentTarget.style.background = 'rgba(255,255,255,0.1)')}
                     onMouseOut={e => (e.currentTarget.style.background = 'rgba(255,255,255,0.05)')}
                   >
                     <span>📁</span> Profile
+                  </button>
+
+                  <button
+                    onClick={e => handleDeleteCandidate(candidate.id, e)}
+                    style={{
+                      background: 'rgba(239, 68, 68, 0.1)',
+                      border: '1px solid rgba(239, 68, 68, 0.3)',
+                      padding: '0.5rem 1rem',
+                      borderRadius: '9999px',
+                      color: '#ef4444',
+                      cursor: 'pointer',
+                      fontSize: '0.875rem',
+                      fontWeight: 600,
+                      transition: 'background 0.2s',
+                      display: 'inline-flex',
+                      alignItems: 'center',
+                      gap: '0.5rem'
+                    }}
+                    onMouseOver={e => (e.currentTarget.style.background = 'rgba(239, 68, 68, 0.2)')}
+                    onMouseOut={e => (e.currentTarget.style.background = 'rgba(239, 68, 68, 0.1)')}
+                  >
+                    <span>🗑️</span> Delete
                   </button>
                 </td>
               </tr>

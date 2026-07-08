@@ -13,7 +13,7 @@ export async function PATCH(request, { params }) {
       );
     }
 
-    const updatedRule = toggleAutomationRule(id, enabled);
+    const updatedRule = await toggleAutomationRule(id, enabled);
     return NextResponse.json({ success: true, data: updatedRule });
   } catch (error) {
     return NextResponse.json({ success: false, error: error.message }, { status: 500 });

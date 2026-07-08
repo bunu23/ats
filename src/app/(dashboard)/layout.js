@@ -1,4 +1,5 @@
 import Link from 'next/link';
+import SlackToastProvider from '../../components/SlackToastProvider';
 
 export default function DashboardLayout({ children }) {
   return (

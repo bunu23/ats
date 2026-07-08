@@ -48,7 +48,14 @@ Get the application running in minutes:
    cp .env.example .env.local
    # Open .env.local and populate your ANTHROPIC_API_KEY if using real AI scoring
    ```
-4. **Start the Servers**
+4. **Initialize Database**
+   ```bash
+   npx prisma generate
+   npx prisma db push
+   # Optional: Seed the database with default data
+   node scripts/migrate-json-to-db.js
+   ```
+5. **Start the Servers**
    To fully test the application locally, run the UI server and the background worker in two separate terminals:
 
    _Terminal 1 (UI & API):_
@@ -86,6 +93,6 @@ At the heart of the ATS is the autonomous rules engine. Here is the lifecycle of
 
 1. **The Trigger:** A recruiter manually drags a candidate from "Applied" to "Phone Screening" on the Kanban board (or a candidate submits a new application via the public portal).
 2. **The API Handoff:** The Next.js API route (`PATCH /api/applications/[id]`) captures this stage change, updates the database, and immediately fires an event to `automation-engine.js`.
-3. **Rule Evaluation:** The engine queries the dynamic `automation_rules` database array to see if any active rules match the destination stage.
+3. **Rule Evaluation:** The engine queries the dynamic `automation_rules` database table to see if any active rules match the destination stage.
 4. **AI Scoring (If Applicable):** If the candidate is brand new, the engine optionally contacts the Anthropic API to analyze the resume against the job requirements, appending a match score out of 100 to the profile.
 5. **Execution & Guardrails:** If a matching rule exists (e.g., "Send Phone Screening Invite"), the engine validates it against the Guardrails. If the action is safe, it logs the email payload to the `activity_log` or schedules it in the `delayed_tasks` queue for the `worker.js` to physically dispatch later.

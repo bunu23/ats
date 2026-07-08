@@ -9,24 +9,24 @@ export async function PATCH(request, { params }) {
     const { id } = resolvedParams;
 
     const data = await request.json();
-    const updatedJob = updateJob(id, data);
+    const updatedJob = await updateJob(id, data);
 
     // Auto-migrate orphaned candidates
     if (data.custom_stages && data.custom_stages.length > 0) {
       const validStages = data.custom_stages;
       const db = require('../../../../lib/db.js');
 
-      const jobApps = db.getAllApplications().filter(a => a.job_id === id);
-      jobApps.forEach(app => {
+      const jobApps = (await db.getAllApplications()).filter(a => a.job_id === id);
+      for (const app of jobApps) {
         if (!validStages.includes(app.stage)) {
           // If the candidate's stage no longer exists, migrate them to the first valid stage
-          db.updateApplicationStage(
+          await db.updateApplicationStage(
             app.id,
             validStages[0],
             'system',
             'Stage auto-migrated due to pipeline configuration change'
           );
-          db.addStageHistory({
+          await db.addStageHistory({
             application_id: app.id,
             from_stage: app.stage,
             to_stage: validStages[0],
@@ -34,7 +34,7 @@ export async function PATCH(request, { params }) {
             notes: 'Stage auto-migrated due to pipeline configuration change'
           });
         }
-      });
+      }
     }
 
     if (updatedJob) {

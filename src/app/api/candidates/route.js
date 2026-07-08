@@ -4,7 +4,7 @@ import { getAllCandidates, createCandidate } from '../../../lib/db.js';
 
 export async function GET() {
   try {
-    const candidates = getAllCandidates();
+    const candidates = await getAllCandidates();
     return NextResponse.json({ success: true, data: candidates });
   } catch (error) {
     return NextResponse.json({ success: false, error: error.message }, { status: 500 });
@@ -14,7 +14,7 @@ export async function GET() {
 export async function POST(request) {
   try {
     const data = await request.json();
-    const candidate = createCandidate(data);
+    const candidate = await createCandidate(data);
     return NextResponse.json({ success: true, data: candidate }, { status: 201 });
   } catch (error) {
     return NextResponse.json({ success: false, error: error.message }, { status: 500 });

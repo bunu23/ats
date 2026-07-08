@@ -1,4 +1,10 @@
-export default function KanbanCard({ app, stage, handleDragStart, updateInterviewDate }) {
+export default function KanbanCard({
+  app,
+  stage,
+  handleDragStart,
+  updateInterviewDate,
+  moveApplication
+}) {
   return (
     <div
       className="kanban-card"
@@ -83,6 +89,46 @@ export default function KanbanCard({ app, stage, handleDragStart, updateIntervie
         >
           AI Score: {app.ai_score}/10
         </div>
+      )}
+
+      {stage === 'Offer' && (
+        <button
+          onClick={() => moveApplication(app.id, 'Background Check')}
+          style={{
+            marginTop: '0.5rem',
+            width: '100%',
+            padding: '0.5rem',
+            background: 'var(--accent-primary)',
+            color: 'white',
+            border: 'none',
+            borderRadius: '0.25rem',
+            cursor: 'pointer',
+            fontSize: '0.75rem',
+            fontWeight: '600'
+          }}
+        >
+          Simulate Signature
+        </button>
+      )}
+
+      {stage === 'Background Check' && (
+        <button
+          onClick={() => moveApplication(app.id, 'Hired')}
+          style={{
+            marginTop: '0.5rem',
+            width: '100%',
+            padding: '0.5rem',
+            background: '#10b981',
+            color: 'white',
+            border: 'none',
+            borderRadius: '0.25rem',
+            cursor: 'pointer',
+            fontSize: '0.75rem',
+            fontWeight: '600'
+          }}
+        >
+          Verify & Hire
+        </button>
       )}
     </div>
   );

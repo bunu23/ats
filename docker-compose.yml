@@ -15,7 +15,10 @@ services:
       - .env.local
     environment:
       - NODE_ENV=production
+      - DATABASE_URL=postgresql://postgres:postgres@db:5432/ats_db?schema=public
     restart: unless-stopped
+    depends_on:
+      - db
 
   worker:
     build:
@@ -29,10 +32,27 @@ services:
       - .env.local
     environment:
       - NODE_ENV=production
+      - DATABASE_URL=postgresql://postgres:postgres@db:5432/ats_db?schema=public
     restart: unless-stopped
     depends_on:
       - web
+      - db
+
+  db:
+    image: postgres:15-alpine
+    container_name: ats-db
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+      - POSTGRES_DB=ats_db
+    ports:
+      - '5432:5432'
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    restart: unless-stopped
 
 volumes:
   ats-data:
     name: ats-shared-data
+  pgdata:
+    name: ats-postgres-data

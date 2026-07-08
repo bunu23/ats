@@ -4,7 +4,7 @@ import { getSettings, updateSettings } from '../../../lib/db.js';
 
 export async function GET() {
   try {
-    const settings = getSettings();
+    const settings = await getSettings();
     return NextResponse.json({ success: true, data: settings }, { status: 200 });
   } catch (error) {
     return NextResponse.json({ success: false, error: error.message }, { status: 500 });
@@ -14,7 +14,7 @@ export async function GET() {
 export async function PATCH(request) {
   try {
     const data = await request.json();
-    const updatedSettings = updateSettings(data);
+    const updatedSettings = await updateSettings(data);
     return NextResponse.json({ success: true, data: updatedSettings }, { status: 200 });
   } catch (error) {
     return NextResponse.json({ success: false, error: error.message }, { status: 500 });

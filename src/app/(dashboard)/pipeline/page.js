@@ -21,15 +21,22 @@ export default function Pipeline() {
 
   useEffect(() => {
     if (!selectedJobId) return;
-    fetch('/api/applications')
-      .then(res => res.json())
-      .then(data => {
-        setLoading(true);
-        if (data.success) {
-          setApplications(data.data.filter(a => a.job_id === selectedJobId));
-        }
-        setLoading(false);
-      });
+
+    const fetchApps = () => {
+      fetch('/api/applications')
+        .then(res => res.json())
+        .then(data => {
+          if (data.success) {
+            setApplications(data.data.filter(a => a.job_id === selectedJobId));
+          }
+          setLoading(false);
+        });
+    };
+
+    fetchApps(); // Initial fetch
+    const interval = setInterval(fetchApps, 10000); // Poll every 10 seconds
+
+    return () => clearInterval(interval);
   }, [selectedJobId]);
 
   const moveApplication = async (id, newStage) => {
@@ -63,8 +70,8 @@ export default function Pipeline() {
       'AI Screening',
       'Phone Screening',
       'Interview',
-      'Background Check',
       'Offer',
+      'Background Check',
       'Hired',
       'Onboarding',
       'Rejected'
@@ -109,8 +116,8 @@ export default function Pipeline() {
     'AI Screening',
     'Phone Screening',
     'Interview',
-    'Background Check',
     'Offer',
+    'Background Check',
     'Hired',
     'Onboarding',
     'Rejected'
@@ -166,6 +173,7 @@ export default function Pipeline() {
         handleDrop={handleDrop}
         handleDragStart={handleDragStart}
         updateInterviewDate={updateInterviewDate}
+        moveApplication={moveApplication}
       />
     </div>
   );

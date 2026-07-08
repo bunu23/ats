@@ -5,7 +5,7 @@ import { processNewApplication } from '../../../lib/automation-engine.js';
 
 export async function GET() {
   try {
-    const applications = db.getAllApplications();
+    const applications = await db.getAllApplications();
     return NextResponse.json({ success: true, data: applications });
   } catch (error) {
     return NextResponse.json({ success: false, error: error.message }, { status: 500 });
@@ -15,7 +15,7 @@ export async function GET() {
 export async function POST(request) {
   try {
     const data = await request.json();
-    const application = db.createApplication(data);
+    const application = await db.createApplication(data);
 
     // Trigger automation asynchronously
     processNewApplication(db, application.id).catch(console.error);

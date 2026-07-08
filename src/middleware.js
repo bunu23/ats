@@ -12,11 +12,23 @@ export function middleware(request) {
     path => request.nextUrl.pathname === path || request.nextUrl.pathname.startsWith(`${path}/`)
   );
 
+  const isApiRoute = request.nextUrl.pathname.startsWith('/api/');
+  const isPublicApiRoute =
+    request.nextUrl.pathname.startsWith('/api/auth/') || request.nextUrl.pathname === '/api/apply';
+
+  // API Authentication Guard
+  if (isApiRoute && !isPublicApiRoute) {
+    if (!session) {
+      return NextResponse.json({ success: false, error: 'Unauthorized' }, { status: 401 });
+    }
+    return NextResponse.next();
+  }
+
   // Allow access to public paths explicitly just in case
   if (
     request.nextUrl.pathname.startsWith('/careers') ||
     request.nextUrl.pathname.startsWith('/login') ||
-    request.nextUrl.pathname.startsWith('/api/') ||
+    isPublicApiRoute ||
     request.nextUrl.pathname.startsWith('/_next/')
   ) {
     return NextResponse.next();

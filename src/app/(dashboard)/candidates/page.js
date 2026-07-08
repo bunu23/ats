@@ -1,9 +1,11 @@
 'use client';
 import { useState, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
 import CandidateTable from './components/CandidateTable';
 import CandidateModal from './components/CandidateModal';
 
 export default function Candidates() {
+  const router = useRouter();
   const [candidates, setCandidates] = useState([]);
   const [applications, setApplications] = useState([]);
   const [jobs, setJobs] = useState([]);
@@ -20,7 +22,8 @@ export default function Candidates() {
     experience_years: 0,
     education: '',
     skills: '',
-    resume_text: ''
+    resume_text: '',
+    job_id: ''
   });
 
   const fetchData = () => {
@@ -43,6 +46,8 @@ export default function Candidates() {
 
   useEffect(() => {
     fetchData();
+    const interval = setInterval(fetchData, 10000);
+    return () => clearInterval(interval);
   }, []);
 
   const handleSearch = e => {
@@ -60,14 +65,25 @@ export default function Candidates() {
 
   const handleAddCandidate = async e => {
     e.preventDefault();
-    await fetch('/api/candidates', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        ...formData,
-        experience_years: parseInt(formData.experience_years) || 0
-      })
-    });
+
+    const payload = {
+      ...formData,
+      experience_years: parseInt(formData.experience_years) || 0
+    };
+
+    if (formData.job_id) {
+      await fetch('/api/apply', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload)
+      });
+    } else {
+      await fetch('/api/candidates', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload)
+      });
+    }
     setShowForm(false);
     setFormData({
       name: '',
@@ -76,9 +92,22 @@ export default function Candidates() {
       experience_years: 0,
       education: '',
       skills: '',
-      resume_text: ''
+      resume_text: '',
+      job_id: ''
     });
     fetchData();
+  };
+
+  const handleDeleteCandidate = async (id, e) => {
+    e.stopPropagation();
+    if (
+      confirm(
+        'Are you sure you want to delete this candidate? This will permanently remove them from the database.'
+      )
+    ) {
+      await fetch(`/api/candidates/${id}`, { method: 'DELETE' });
+      fetchData();
+    }
   };
 
   const getCandidateAppInfo = candidateId => {
@@ -135,9 +164,16 @@ export default function Candidates() {
       color: stageInfo.color,
       bg: stageInfo.bg,
       role: job ? job.title : 'Unknown Role',
+      job_id: latestApp ? latestApp.job_id : null,
       score,
       source
     };
+  };
+
+  const navigateToPipeline = jobId => {
+    if (jobId) {
+      router.push(`/pipeline?jobId=${jobId}`);
+    }
   };
 
   const handleAddReview = () => {
@@ -219,6 +255,36 @@ export default function Candidates() {
         >
           <h3>Add New Candidate</h3>
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
+            <div>
+              <label style={{ fontSize: '0.875rem', color: 'var(--text-secondary)' }}>
+                Apply to Role (Required)
+              </label>
+              <select
+                required
+                value={formData.job_id}
+                onChange={e => setFormData({ ...formData, job_id: e.target.value })}
+                style={{
+                  padding: '0.75rem',
+                  borderRadius: '0.25rem',
+                  border: '1px solid #ccc',
+                  background: 'white',
+                  color: 'black',
+                  width: '100%',
+                  marginTop: '0.25rem'
+                }}
+              >
+                <option value="" disabled>
+                  -- Select a Role --
+                </option>
+                {jobs
+                  .filter(j => j.status === 'Open')
+                  .map(job => (
+                    <option key={job.id} value={job.id}>
+                      {job.title}
+                    </option>
+                  ))}
+              </select>
+            </div>
             <div>
               <label style={{ fontSize: '0.875rem', color: 'var(--text-secondary)' }}>
                 Full Name
@@ -379,6 +445,8 @@ export default function Candidates() {
         filteredCandidates={filteredCandidates}
         getCandidateAppInfo={getCandidateAppInfo}
         openModal={openModal}
+        navigateToPipeline={navigateToPipeline}
+        handleDeleteCandidate={handleDeleteCandidate}
       />
 
       {selectedCandidate && (

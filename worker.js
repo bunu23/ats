@@ -15,23 +15,23 @@ setInterval(async () => {
   console.log(`[${now.toISOString()}] Running periodic checks...`);
 
   // 1. Process Delayed Tasks (Phase 1 Delayed Rejections, etc)
-  const pendingTasks = getAndClearPendingTasks();
+  const pendingTasks = await getAndClearPendingTasks();
   for (const task of pendingTasks) {
     if (task.type === 'delayed_rejection') {
       const p = task.payload;
 
       // Ensure application wasn't moved or already rejected in the meantime
-      const apps = getAllApplications();
+      const apps = await getAllApplications();
       const currentApp = apps.find(a => a.id === p.applicationId);
 
       if (currentApp && currentApp.stage !== 'Rejected' && currentApp.stage !== 'Archived') {
-        updateApplicationStage(
+        await updateApplicationStage(
           p.applicationId,
           'Rejected',
           'system',
           'Delayed rejection executed (48h)'
         );
-        addActivityLog({
+        await addActivityLog({
           type: 'email_sent',
           title: `Delayed Rejection Sent: ${p.candidateName}`,
           description: `Dear ${p.candidateName}, thank you for your patience. After reviewing your application, we have decided to proceed with other candidates whose profiles more closely match our current needs for the ${p.jobTitle} position.`,
@@ -45,7 +45,7 @@ setInterval(async () => {
     // Phase 3: Post-Interview Note
     else if (task.type === 'post_interview_note') {
       const p = task.payload;
-      addActivityLog({
+      await addActivityLog({
         type: 'email_sent',
         title: `Post-Interview Thank You: ${p.candidateName}`,
         description: `Dear ${p.candidateName}, thank you for your time today! Our team really enjoyed speaking with you. We are currently consolidating our reviews and will be in touch with next steps shortly.`,
@@ -58,14 +58,14 @@ setInterval(async () => {
   }
 
   // 2. Process SLAs and Time-Based Application Rules
-  const applications = getAllApplications();
+  const applications = await getAllApplications();
 
   for (const app of applications) {
     if (app.stage === 'Hired' || app.stage === 'Rejected' || app.withdrawn) {
       continue; // Skip closed or withdrawn applications
     }
 
-    const job = getJobById(app.job_id);
+    const job = await getJobById(app.job_id);
     if (!job || job.status === 'Closed') continue;
 
     const enteredAt = new Date(app.stage_entered_at);
@@ -77,8 +77,8 @@ setInterval(async () => {
       // SLA Breach Logic
       if (daysInStage > slaLimit + 2) {
         if (app.priority !== 'Urgent') {
-          updateApplicationData(app.id, { priority: 'Urgent' });
-          addActivityLog({
+          await updateApplicationData(app.id, { priority: 'Urgent' });
+          await addActivityLog({
             type: 'notification',
             title: `SLA BREACH ESCALATED: ${app.candidate_name}`,
             description: `Application has been stuck in ${app.stage} for over ${Math.floor(daysInStage)} days. HR has been notified.`,
@@ -89,8 +89,8 @@ setInterval(async () => {
         }
       } else if (daysInStage > slaLimit + 1) {
         if (app.priority !== 'High') {
-          updateApplicationData(app.id, { priority: 'High' });
-          addActivityLog({
+          await updateApplicationData(app.id, { priority: 'High' });
+          await addActivityLog({
             type: 'notification',
             title: `SLA WARNING: ${app.candidate_name}`,
             description: `Application exceeds SLA by over 1 day in ${app.stage}. Hiring manager notified.`,
@@ -100,8 +100,8 @@ setInterval(async () => {
           });
         }
       } else if (!app.sla_notified) {
-        updateApplicationData(app.id, { sla_notified: true });
-        addActivityLog({
+        await updateApplicationData(app.id, { sla_notified: true });
+        await addActivityLog({
           type: 'notification',
           title: `SLA Breached: ${app.candidate_name}`,
           description: `Application exceeded the ${slaLimit}-day SLA for ${app.stage}.`,
@@ -114,8 +114,8 @@ setInterval(async () => {
 
     // Auto-Reject Applied > 14 days
     if (app.stage === 'Applied' && daysInStage > 14) {
-      updateApplicationStage(app.id, 'Rejected', 'system', 'Auto-rejected after 14 days');
-      addActivityLog({
+      await updateApplicationStage(app.id, 'Rejected', 'system', 'Auto-rejected after 14 days');
+      await addActivityLog({
         type: 'stage_change',
         title: `Auto-Rejected: ${app.candidate_name}`,
         description: `Candidate automatically rejected for sitting in Applied stage > 14 days.`,
@@ -127,13 +127,13 @@ setInterval(async () => {
 
     // Auto-Reject Screening > 3 days
     if (app.stage === 'Screening' && daysInStage > 3) {
-      updateApplicationStage(
+      await updateApplicationStage(
         app.id,
         'Rejected',
         'system',
         'Auto-rejected after 3 days in Screening'
       );
-      addActivityLog({
+      await addActivityLog({
         type: 'stage_change',
         title: `Auto-Rejected: ${app.candidate_name}`,
         description: `Candidate automatically rejected for sitting in Screening stage > 3 days.`,
@@ -151,8 +151,8 @@ setInterval(async () => {
 
       // PHASE 2: The "24-Hour Reminder" with prep tips
       if (hoursUntil > 0 && hoursUntil <= 24 && !app.reminded_24h) {
-        updateApplicationData(app.id, { reminded_24h: true });
-        addActivityLog({
+        await updateApplicationData(app.id, { reminded_24h: true });
+        await addActivityLog({
           type: 'email_sent',
           title: `Interview Reminder (24h): ${app.candidate_name}`,
           description: `Dear ${app.candidate_name}, friendly reminder that your interview is tomorrow! Preparation tip: Make sure to review our recent product launch. Tech-check link: meet.google.com/test. We look forward to seeing you.`,
@@ -164,8 +164,8 @@ setInterval(async () => {
       }
       // 1-Hour Reminder
       else if (hoursUntil > 0 && hoursUntil <= 1 && !app.reminded_1h) {
-        updateApplicationData(app.id, { reminded_1h: true });
-        addActivityLog({
+        await updateApplicationData(app.id, { reminded_1h: true });
+        await addActivityLog({
           type: 'email_sent',
           title: `Interview Reminder (1h): ${app.candidate_name}`,
           description: `Your interview starts in 1 hour. Get ready!`,
@@ -179,9 +179,9 @@ setInterval(async () => {
       // PHASE 3: The "Thank You for Your Time" Note (2 hours after interview)
       // Assuming interview lasts 1 hour, so 3 hours after start time we send a note.
       else if (hoursUntil < -3 && !app.post_interview_thank_you_sent) {
-        updateApplicationData(app.id, { post_interview_thank_you_sent: true });
+        await updateApplicationData(app.id, { post_interview_thank_you_sent: true });
         // Instead of queueing, we can just execute it immediately since we are in the worker loop and the time has passed.
-        addActivityLog({
+        await addActivityLog({
           type: 'email_sent',
           title: `Post-Interview Thank You: ${app.candidate_name}`,
           description: `Dear ${app.candidate_name}, thank you for your time today! Our team really enjoyed speaking with you. We are currently consolidating our reviews and will be in touch with next steps shortly.`,

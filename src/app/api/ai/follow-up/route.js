@@ -13,7 +13,7 @@ export async function POST(request) {
       );
     }
 
-    const application = getApplicationById(applicationId);
+    const application = await getApplicationById(applicationId);
     if (!application) {
       return NextResponse.json({ success: false, error: 'Application not found' }, { status: 404 });
     }
