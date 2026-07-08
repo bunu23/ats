@@ -5,12 +5,22 @@ export default function KanbanCard({
   updateInterviewDate,
   moveApplication
 }) {
+  const isBelowThreshold = app.ai_score !== undefined && app.ai_score !== null && app.ai_score < 60;
+
   return (
     <div
       className="kanban-card"
-      draggable
-      onDragStart={e => handleDragStart(e, app.id)}
+      draggable={!isBelowThreshold}
+      onDragStart={e => {
+        if (!isBelowThreshold) {
+          handleDragStart(e, app.id);
+        } else {
+          e.preventDefault();
+        }
+      }}
       style={{
+        opacity: isBelowThreshold ? 0.6 : 1,
+        cursor: isBelowThreshold ? 'not-allowed' : 'grab',
         borderLeft:
           app.priority === 'Urgent'
             ? '4px solid #ef4444'
@@ -80,14 +90,43 @@ export default function KanbanCard({
         </div>
       )}
 
-      {app.ai_score && (
+      {app.ai_score !== undefined && app.ai_score !== null && (
         <div
-          className="ai-score-badge"
           style={{
-            background: app.ai_score >= 8 ? 'rgba(34, 197, 94, 0.2)' : 'rgba(255,255,255,0.05)'
+            display: 'flex',
+            justifyContent: 'space-between',
+            alignItems: 'center',
+            marginTop: '0.5rem',
+            background: 'rgba(0,0,0,0.2)',
+            padding: '0.5rem',
+            borderRadius: '0.25rem'
           }}
         >
-          AI Score: {app.ai_score}/10
+          <div style={{ fontSize: '0.75rem', color: 'var(--text-secondary)' }}>
+            AI Score: <strong style={{ color: 'white' }}>{app.ai_score}/100</strong>
+          </div>
+          <div
+            style={{
+              fontSize: '0.65rem',
+              fontWeight: 700,
+              padding: '0.15rem 0.4rem',
+              borderRadius: '0.25rem',
+              background:
+                app.ai_score > 85
+                  ? 'rgba(74, 222, 128, 0.1)'
+                  : app.ai_score >= 60
+                    ? 'rgba(59, 130, 246, 0.1)'
+                    : 'rgba(248, 113, 113, 0.1)',
+              color: app.ai_score > 85 ? '#4ade80' : app.ai_score >= 60 ? '#60a5fa' : '#f87171',
+              border: `1px solid ${app.ai_score > 85 ? '#4ade8040' : app.ai_score >= 60 ? '#60a5fa40' : '#f8717140'}`
+            }}
+          >
+            {app.ai_score > 85
+              ? 'Exceptional Fit'
+              : app.ai_score >= 60
+                ? 'Good Fit'
+                : 'Below Threshold'}
+          </div>
         </div>
       )}
 

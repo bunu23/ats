@@ -51,6 +51,20 @@ export async function processStageChange(db, applicationId, fromStage, toStage) 
     results.push({ action: 'slack_notification_sent' });
   }
 
+  // Mock Phone Screening Invite
+  if (toStageLower === 'phone screening') {
+    await db.addActivityLog({
+      type: 'email_sent',
+      title: `Interview Invite: Phone Screen with ${application.candidate_name}`,
+      description: `Hi ${application.candidate_name},\n\nWe'd love to schedule a quick 30-minute phone screen with you to discuss your background and the ${application.job_title} role.\n\nPlease pick a time here: ${templateVars.calendly_link || 'https://calendly.com/recruiter'}\n\nBest,\nThe Recruiting Team`,
+      metadata: { to: application.candidate_email, automated: true },
+      application_id: applicationId,
+      job_id: application.job_id,
+      candidate_id: application.candidate_id
+    });
+    results.push({ action: 'phone_screen_invite_sent' });
+  }
+
   // PHASE 5: The Offer Stage Guardrail
   if (toStageLower === 'offer') {
     await db.addActivityLog({
@@ -198,14 +212,22 @@ export async function processNewApplication(db, applicationId) {
   });
   results.push({ action: 'instant_confirmation_sent', email: application.candidate_email });
 
-  // Auto-score the candidate
+  // Auto-score the candidate (or use manually provided score)
   try {
-    const score = await scoreCandidate(application, application);
-    await db.updateApplicationScore(applicationId, score.overallScore, JSON.stringify(score));
+    let score;
+    if (application.ai_score !== null && application.ai_score !== undefined) {
+      score = {
+        overallScore: application.ai_score,
+        recommendation: 'Manual score provided via UI.'
+      };
+    } else {
+      score = await scoreCandidate(application, application);
+      await db.updateApplicationScore(applicationId, score.overallScore, JSON.stringify(score));
+    }
 
     await db.addActivityLog({
       type: 'ai_scoring',
-      title: `AI Score: ${application.candidate_name} — ${score.overallScore}/10`,
+      title: `AI Score: ${application.candidate_name} — ${score.overallScore}/100`,
       description: score.recommendation,
       metadata: { score, automated: true },
       application_id: applicationId,
@@ -216,25 +238,35 @@ export async function processNewApplication(db, applicationId) {
     results.push({ action: 'auto_scored', score: score.overallScore });
 
     // PHASE 1: Fast-Track Screening Match
-    if (score.overallScore >= 9) {
-      // 90%
+    if (score.overallScore > 85) {
       await db.updateApplicationData(applicationId, { priority: 'High' });
-      const nextStage = job.custom_stages.includes('AI Screening') ? 'AI Screening' : 'Interview';
       await db.updateApplicationStage(
         applicationId,
-        nextStage,
+        'Phone Screening',
         'system',
-        'Fast-Track: Exceptionally high match score'
+        'Fast-Track: Exceptionally high match score (>85)'
       );
 
       // Since updateApplicationStage no longer fires automation, we call processStageChange here
-      await processStageChange(db, applicationId, application.stage, nextStage).catch(
+      await processStageChange(db, applicationId, application.stage, 'Phone Screening').catch(
+        console.error
+      );
+    }
+    // Normal Progression to Screening
+    else if (score.overallScore >= 60 && score.overallScore <= 85) {
+      await db.updateApplicationStage(
+        applicationId,
+        'AI Screening',
+        'system',
+        'Passed initial AI threshold (60-85)'
+      );
+
+      await processStageChange(db, applicationId, application.stage, 'AI Screening').catch(
         console.error
       );
     }
     // PHASE 1: Delayed Rejection (The 5-Minute Rejection guard)
-    else if (score.overallScore <= 6) {
-      // 60%
+    else if (score.overallScore <= 59) {
       const executeAt = new Date(Date.now() + 48 * 60 * 60 * 1000).toISOString(); // 48 hours later
 
       await db.addDelayedTask({
@@ -251,9 +283,9 @@ export async function processNewApplication(db, applicationId) {
       });
 
       await db.addActivityLog({
-        type: 'notification',
+        type: 'delayed_rejection',
         title: `Delayed Rejection Queued: ${application.candidate_name}`,
-        description: `Candidate scored low (${score.overallScore}/10). To maintain human empathy, their rejection email has been queued to send in 48 hours instead of instantly.`,
+        description: `Candidate scored low (${score.overallScore}/100). To maintain human empathy, their rejection email has been queued to send in 48 hours instead of instantly.`,
         metadata: { automated: true, execute_at: executeAt },
         application_id: applicationId,
         job_id: application.job_id,

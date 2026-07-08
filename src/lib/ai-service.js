@@ -126,31 +126,31 @@ function scoreCandidateMock(candidate, job) {
   ).length;
 
   const skillsMatch =
-    reqWords.length > 0 ? Math.min(10, Math.round((matchCount / reqWords.length) * 10)) : 7;
+    reqWords.length > 0 ? Math.min(100, Math.round((matchCount / reqWords.length) * 100)) : 70;
 
   const expYears = candidate.experience_years || 0;
-  const experienceScore = Math.min(10, Math.round(expYears * 1.5));
+  const experienceScore = Math.min(100, Math.round(expYears * 15));
 
-  const educationScore = candidate.education || candidate.candidate_education ? 7 : 5;
+  const educationScore = candidate.education || candidate.candidate_education ? 70 : 50;
 
-  const overall =
-    Math.round((skillsMatch * 0.4 + experienceScore * 0.35 + educationScore * 0.25) * 10) / 10;
+  const overall = Math.round(skillsMatch * 0.4 + experienceScore * 0.35 + educationScore * 0.25);
 
   const strengths = [];
   const gaps = [];
 
-  if (skillsMatch >= 7) strengths.push('Strong skills alignment with job requirements');
-  if (experienceScore >= 7) strengths.push('Solid relevant experience');
-  if (educationScore >= 7) strengths.push('Relevant educational background');
-  if (skillsMatch < 5) gaps.push('Limited skills match — may need additional training');
-  if (experienceScore < 5) gaps.push('Less experience than ideal for this role');
+  if (skillsMatch >= 70) strengths.push('Strong skills alignment with job requirements');
+  if (experienceScore >= 70) strengths.push('Solid relevant experience');
+  if (educationScore >= 70) strengths.push('Relevant educational background');
+  if (skillsMatch < 50) gaps.push('Limited skills match — may need additional training');
+  if (experienceScore < 50) gaps.push('Less experience than ideal for this role');
   if (gaps.length === 0 && strengths.length < 2) strengths.push('Well-rounded candidate profile');
   if (gaps.length === 0) gaps.push('No significant gaps identified');
 
   let recommendation;
-  if (overall >= 8) recommendation = 'Excellent fit — strongly recommend advancing to interview';
-  else if (overall >= 6) recommendation = 'Good fit — recommend advancing to screening';
-  else if (overall >= 4)
+  if (overall > 85)
+    recommendation = 'Excellent fit — strongly recommend advancing to phone screening';
+  else if (overall >= 60) recommendation = 'Good fit — recommend advancing to screening';
+  else if (overall >= 40)
     recommendation = 'Moderate fit — review application details before deciding';
   else recommendation = 'Below threshold — consider for other positions';
 
@@ -194,7 +194,7 @@ Experience: ${candidate.experience_years || 0} years
 Education: ${candidate.education || candidate.candidate_education || 'Not specified'}
 Resume: ${(candidate.resume_text || '').substring(0, 500)}
 
-Return JSON with: overallScore (0-10), dimensions (skillsMatch, experienceRelevance, educationFit each 0-10), strengths (array), gaps (array), recommendation (string).`
+Return JSON with: overallScore (0-100), dimensions (skillsMatch, experienceRelevance, educationFit each 0-100), strengths (array), gaps (array), recommendation (string).`
           }
         ]
       })

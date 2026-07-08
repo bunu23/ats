@@ -6,7 +6,17 @@ import { processNewApplication } from '../../../lib/automation-engine.js';
 export async function POST(request) {
   try {
     const data = await request.json();
-    const { job_id, name, email, phone, experience_years, education, skills, resume_text } = data;
+    const {
+      job_id,
+      name,
+      email,
+      phone,
+      experience_years,
+      education,
+      skills,
+      resume_text,
+      resume_score
+    } = data;
 
     if (!job_id || !name || !email) {
       return NextResponse.json(
@@ -46,7 +56,8 @@ export async function POST(request) {
       job_id,
       candidate_id: candidate.id,
       stage: firstStage,
-      source: 'Careers Site'
+      source: 'Careers Site',
+      ai_score: resume_score !== undefined && resume_score !== '' ? parseInt(resume_score) : null
     });
 
     // 3. Trigger Automation Engine!

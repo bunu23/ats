@@ -183,7 +183,8 @@ export async function createApplication(data) {
       stage: data.stage || 'Applied',
       priority: data.priority || 'Normal',
       withdrawn: data.withdrawn || false,
-      notes: data.notes || null
+      notes: data.notes || null,
+      ai_score: data.ai_score !== undefined ? data.ai_score : null
     }
   });
   return await getApplicationById(app.id);

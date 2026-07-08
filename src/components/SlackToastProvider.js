@@ -8,17 +8,22 @@ export default function SlackToastProvider() {
   useEffect(() => {
     const fetchLatest = async () => {
       try {
-        const res = await fetch('/api/activity');
+        const res = await fetch(`/api/activity?t=${Date.now()}`);
         const data = await res.json();
         if (data.success && data.data.length > 0) {
           const notifyLogs = data.data.filter(
-            log => log.type === 'slack_notification' || log.type === 'stage_change'
+            log =>
+              log.type === 'slack_notification' ||
+              log.type === 'email_sent' ||
+              log.type === 'notification'
           );
           if (notifyLogs.length > 0) {
-            // If there's a slack_notification in the top 3 recent logs, prioritize it
+            // Prioritize specific high-visibility logs if multiple exist in the recent batch
             const recentLogs = notifyLogs.slice(0, 3);
-            const slackLog = recentLogs.find(l => l.type === 'slack_notification');
-            const latest = slackLog || notifyLogs[0];
+            const priorityLog = recentLogs.find(
+              l => l.type === 'slack_notification' || l.type === 'email_sent'
+            );
+            const latest = priorityLog || notifyLogs[0];
 
             if (lastActivityId && latest.id !== lastActivityId) {
               setToast(latest);
@@ -45,7 +50,10 @@ export default function SlackToastProvider() {
   if (!toast) return null;
 
   const isSlack = toast.type === 'slack_notification';
-  const bgColor = isSlack ? '#4a154b' : '#0ea5e9'; // Slack corporate purple vs Accent primary blue
+  const isEmail = toast.type === 'email_sent';
+  const isAlert = toast.type === 'notification';
+
+  const bgColor = isSlack ? '#4a154b' : isEmail ? '#0284c7' : isAlert ? '#ef4444' : '#0ea5e9';
   const icon = isSlack ? (
     <img
       src="https://upload.wikimedia.org/wikipedia/commons/b/b9/Slack_Technologies_Logo.svg"
@@ -57,6 +65,10 @@ export default function SlackToastProvider() {
         filter: 'brightness(0) invert(1)'
       }}
     />
+  ) : isEmail ? (
+    <span style={{ fontSize: '1.2rem', marginRight: '8px' }}>✉️</span>
+  ) : isAlert ? (
+    <span style={{ fontSize: '1.2rem', marginRight: '8px' }}>🚨</span>
   ) : (
     <span style={{ fontSize: '1.2rem', marginRight: '8px' }}>🔄</span>
   );

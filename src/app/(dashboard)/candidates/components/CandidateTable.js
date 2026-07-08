@@ -181,10 +181,10 @@ export default function CandidateTable({
                             width: `${appInfo.score}%`,
                             height: '100%',
                             background:
-                              appInfo.score > 80
+                              appInfo.score > 85
                                 ? '#4ade80'
-                                : appInfo.score > 60
-                                  ? '#fbbf24'
+                                : appInfo.score >= 60
+                                  ? '#60a5fa'
                                   : '#f87171'
                           }}
                         />

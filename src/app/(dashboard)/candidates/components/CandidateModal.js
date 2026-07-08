@@ -58,18 +58,30 @@ export default function CandidateModal({
               <span
                 style={{
                   background:
-                    selectedCandidate.appInfo.score > 80
+                    selectedCandidate.appInfo.score > 85
                       ? 'rgba(74, 222, 128, 0.1)'
-                      : 'rgba(251, 191, 36, 0.1)',
-                  color: selectedCandidate.appInfo.score > 80 ? '#4ade80' : '#fbbf24',
-                  border: `1px solid ${selectedCandidate.appInfo.score > 80 ? '#4ade8040' : '#fbbf2440'}`,
+                      : selectedCandidate.appInfo.score >= 60
+                        ? 'rgba(59, 130, 246, 0.1)'
+                        : 'rgba(248, 113, 113, 0.1)',
+                  color:
+                    selectedCandidate.appInfo.score > 85
+                      ? '#4ade80'
+                      : selectedCandidate.appInfo.score >= 60
+                        ? '#60a5fa'
+                        : '#f87171',
+                  border: `1px solid ${selectedCandidate.appInfo.score > 85 ? '#4ade8040' : selectedCandidate.appInfo.score >= 60 ? '#60a5fa40' : '#f8717140'}`,
                   padding: '0.25rem 0.75rem',
                   borderRadius: '9999px',
                   fontSize: '0.75rem',
                   fontWeight: 700
                 }}
               >
-                {selectedCandidate.appInfo.score}% Match Score
+                {selectedCandidate.appInfo.score}% -{' '}
+                {selectedCandidate.appInfo.score > 85
+                  ? 'Exceptional Fit'
+                  : selectedCandidate.appInfo.score >= 60
+                    ? 'Good Fit'
+                    : 'Below Threshold'}
               </span>
             )}
           </div>

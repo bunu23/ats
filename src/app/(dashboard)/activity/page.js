@@ -8,7 +8,18 @@ const ActivityItem = ({ log, expandedId, setExpandedId }) => {
     meta = JSON.parse(log.metadata || '{}');
   } catch (e) {}
 
-  const isAlert = log.type === 'slack_notification' || log.type === 'notification';
+  const isAlert = log.type === 'notification';
+  const isSlack = log.type === 'slack_notification';
+
+  let borderColor = 'none';
+  let bgColor = 'transparent';
+  if (isAlert) {
+    borderColor = '4px solid #ef4444';
+    bgColor = 'rgba(239, 68, 68, 0.05)';
+  } else if (isSlack) {
+    borderColor = '4px solid #a855f7';
+    bgColor = 'rgba(168, 85, 247, 0.05)';
+  }
 
   return (
     <div
@@ -18,16 +29,16 @@ const ActivityItem = ({ log, expandedId, setExpandedId }) => {
         transition: 'background 0.2s',
         padding: '1rem',
         borderRadius: '0.5rem',
-        borderLeft: isAlert ? '4px solid #ef4444' : 'none',
-        background: isAlert ? 'rgba(239, 68, 68, 0.05)' : 'transparent',
+        borderLeft: borderColor,
+        background: bgColor,
         marginBottom: '0.5rem'
       }}
       onClick={() => setExpandedId(isExpanded ? null : log.id)}
       onMouseEnter={e => {
-        if (!isAlert) e.currentTarget.style.background = 'rgba(255,255,255,0.05)';
+        if (!isAlert && !isSlack) e.currentTarget.style.background = 'rgba(255,255,255,0.05)';
       }}
       onMouseLeave={e => {
-        if (!isAlert) e.currentTarget.style.background = 'transparent';
+        if (!isAlert && !isSlack) e.currentTarget.style.background = 'transparent';
       }}
     >
       <div style={{ display: 'flex', alignItems: 'flex-start' }}>
@@ -154,7 +165,7 @@ const ActivityItem = ({ log, expandedId, setExpandedId }) => {
                       backgroundColor: 'rgba(0,0,0,0.3)',
                       padding: '1.25rem',
                       borderRadius: '0.5rem',
-                      borderLeft: '4px solid var(--text-secondary)',
+                      borderLeft: isSlack ? '4px solid #a855f7' : '4px solid var(--text-secondary)',
                       fontSize: '0.875rem'
                     }}
                   >
@@ -294,12 +305,15 @@ export default function Activity() {
   );
   const emailLogs = logs.filter(l => l.type === 'email_sent');
   const systemEvents = logs.filter(l => l.type === 'stage_change' || l.type === 'new_application');
-  const priorityAlerts = logs.filter(
-    l =>
-      l.type === 'slack_notification' ||
-      l.type === 'notification' ||
-      (l.metadata && (l.metadata.includes('Urgent') || l.metadata.includes('High')))
-  );
+  const priorityAlerts = logs.filter(l => {
+    if (l.type === 'slack_notification' || l.type === 'notification') return true;
+    try {
+      const meta = JSON.parse(l.metadata || '{}');
+      return meta.priority === 'Urgent' || meta.priority === 'High';
+    } catch (e) {
+      return false;
+    }
+  });
 
   return (
     <div>

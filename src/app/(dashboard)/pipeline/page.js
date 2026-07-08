@@ -4,7 +4,7 @@ import KanbanBoard from './components/KanbanBoard';
 
 export default function Pipeline() {
   const [jobs, setJobs] = useState([]);
-  const [selectedJobId, setSelectedJobId] = useState(null);
+  const [selectedJobId, setSelectedJobId] = useState('all');
   const [applications, setApplications] = useState([]);
   const [loading, setLoading] = useState(true);
 
@@ -14,7 +14,6 @@ export default function Pipeline() {
       .then(data => {
         if (data.success && data.data.length > 0) {
           setJobs(data.data);
-          setSelectedJobId(data.data[0].id);
         }
       });
   }, []);
@@ -27,7 +26,11 @@ export default function Pipeline() {
         .then(res => res.json())
         .then(data => {
           if (data.success) {
-            setApplications(data.data.filter(a => a.job_id === selectedJobId));
+            if (selectedJobId === 'all') {
+              setApplications(data.data);
+            } else {
+              setApplications(data.data.filter(a => a.job_id === selectedJobId));
+            }
           }
           setLoading(false);
         });
@@ -127,7 +130,7 @@ export default function Pipeline() {
       ? activeJob.custom_stages
       : DEFAULT_STAGES;
 
-  if (!activeJob) return <div>Loading pipeline...</div>;
+  if (loading) return <div>Loading pipeline...</div>;
 
   return (
     <div>
@@ -158,6 +161,9 @@ export default function Pipeline() {
             minWidth: '250px'
           }}
         >
+          <option value="all" style={{ color: 'black' }}>
+            All Positions
+          </option>
           {jobs.map(job => (
             <option key={job.id} value={job.id} style={{ color: 'black' }}>
               {job.title} ({job.status})

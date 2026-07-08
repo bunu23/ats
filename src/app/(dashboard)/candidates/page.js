@@ -25,6 +25,7 @@ export default function Candidates() {
     education: '',
     skills: '',
     resume_text: '',
+    resume_score: '',
     job_id: ''
   });
 
@@ -95,6 +96,7 @@ export default function Candidates() {
       education: '',
       skills: '',
       resume_text: '',
+      resume_score: '',
       job_id: ''
     });
     fetchData();
@@ -424,6 +426,28 @@ export default function Candidates() {
                 placeholder="e.g. React, Node.js, Python"
                 value={formData.skills}
                 onChange={e => setFormData({ ...formData, skills: e.target.value })}
+                style={{
+                  padding: '0.75rem',
+                  borderRadius: '0.25rem',
+                  border: '1px solid #ccc',
+                  background: 'white',
+                  color: 'black',
+                  width: '100%',
+                  marginTop: '0.25rem'
+                }}
+              />
+            </div>
+            <div>
+              <label style={{ fontSize: '0.875rem', color: 'var(--text-secondary)' }}>
+                Override AI Score (0-100)
+              </label>
+              <input
+                type="number"
+                min="0"
+                max="100"
+                placeholder="e.g. 95 (Leave blank for Auto-Score)"
+                value={formData.resume_score}
+                onChange={e => setFormData({ ...formData, resume_score: e.target.value })}
                 style={{
                   padding: '0.75rem',
                   borderRadius: '0.25rem',
