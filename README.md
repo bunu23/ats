@@ -1,99 +1,85 @@
-# AI-Powered Applicant Tracking System (ATS)
+# 🚀 Autonomous Applicant Tracking System (ATS)
 
-## 1. The High-Level Hook
+An intelligent, autonomous Applicant Tracking System built with Next.js 16, designed to automate recruitment workflows using AI evaluation, state machines, and background event dispatchers.
 
-Hiring is often bottlenecked by administrative overhead—scheduling, sending updates, and scoring resumes. This Applicant Tracking System (ATS) solves that business problem by introducing an **Autonomous Evaluation Engine**. It seamlessly manages candidate status updates, rules-driven pipeline progressions, and intelligent resume scoring without requiring manual recruiter intervention. By automating the routine, talent acquisition teams can focus strictly on the human element of hiring.
+## 📖 Project Overview
 
-## 2. Architectural Highlights & Technical Choices
+This Next-Gen ATS removes the manual overhead of moving candidates through a pipeline. By combining a beautiful glassmorphic UI with a headless Automation Engine, the system reads resumes, scores candidates on a 100-point scale, and autonomously drives pipeline stages based on dynamic knockout rules.
 
-To ensure the application remains scalable, testable, and lightning-fast, we adopted a strictly decoupled architecture:
+- **Automated Resume Parsing:** AI extracts fields directly from candidate uploads.
+- **Autonomous Pipeline Progression:** Candidates are automatically moved to Screening or Phone Screen stages based on AI evaluation scores.
+- **Event-Driven Workflows:** Background tasks handle scheduling, "Empathy Delay" rejection emails, and SLA escalations.
 
-- **Separation of Concerns:** The frontend (Next.js App Router UI), the data access layer (`src/lib/db.js`), and the business logic (`src/lib/automation-engine.js`) are entirely separated. This means the UI is never bogged down by complex business rules, and the database can be swapped without rewriting the engine.
-- **Modern UI Design:** Features a global dark glassmorphic design system that provides a premium and responsive user experience.
-- **Asynchronous Background Worker:** All heavy lifting—such as dispatching emails, executing SLA rules, or scheduling 48-hour delayed rejections—is offloaded to a standalone Node.js process (`worker.js`). This ensures that the primary UI and API routes respond instantly to recruiter actions.
-- **Dynamic Configuration Dashboard:** Automated pipeline rules and SLA timeouts are not hardcoded. Recruiters can configure timeouts (like the Stale Sweeper) and Email Templates via a dedicated `/settings` UI, immediately altering how the background worker behaves.
-- **Dependency Injection:** The automation engine receives its database client via parameter injection, making it highly modular and effortlessly mockable during unit testing.
-
-## 3. Production Readiness & Security Measures
-
-This system is fortified with industry-standard safety measures to make it robust for real-world deployment:
-
-- **Environment Isolation:** All sensitive variables, such as `ANTHROPIC_API_KEY` or `AI_PROVIDER`, are strictly kept out of the source code. They are managed exclusively through secure `.env` files (documented in `.env.example`).
-- **Containerization:** The repository includes a production-ready, multi-stage `Dockerfile` and a `docker-compose.yml` to orchestrate both the Next.js server and the background worker seamlessly with a shared state volume.
-- **Continuous Integration (CI/CD):** A strict GitHub Actions pipeline (`.github/workflows/ci.yml`) automatically audits dependencies, enforces formatting, and runs the entire test suite before any Pull Request can be merged.
-- **Guardrail Logic:** Hardcoded business safety constraints ensure the AI can _never_ autonomously send official job offers or automatically reject candidates in late-stage interviews without explicit human approval.
-
-## 4. Step-by-Step Local Setup Guide
-
-Get the application running in minutes:
+## ⚡ Quick Start Guide
 
 ### Prerequisites
 
-- Node.js (v22+)
-- npm
-- Docker & Docker Compose (Optional, for containerized deployment)
+- Node.js (v18+)
+- npm or yarn
 
-### Local Development Setup
+### Installation & Setup
 
-1. **Clone the Repository**
-   ```bash
-   git clone <repository-url>
-   cd ats-project
-   ```
-2. **Install Dependencies**
+1. **Clone & Install**
+
    ```bash
    npm install
    ```
-3. **Configure Environment Variables**
+
+2. **Database Setup**
+   The project uses SQLite and Prisma for persistence.
+
    ```bash
-   cp .env.example .env.local
-   # Open .env.local and populate your ANTHROPIC_API_KEY if using real AI scoring
-   ```
-4. **Initialize Database**
-   ```bash
-   npx prisma generate
    npx prisma db push
-   # Optional: Seed the database with default data
-   node scripts/migrate-json-to-db.js
+   # A seed script will run automatically to populate dummy jobs and candidates
    ```
-5. **Start the Servers**
-   To fully test the application locally, run the UI server and the background worker in two separate terminals:
 
-   _Terminal 1 (UI & API):_
-
+3. **Run the Development Server & Background Worker**
    ```bash
    npm run dev
    ```
+   Navigate to `http://localhost:3000` to enter the Recruiter Dashboard.
 
-   _Terminal 2 (Automation Worker):_
+## ⚙️ Core State Machine Layout
 
-   ```bash
-   node worker.js
-   ```
+The ATS architecture bridges a vertical backend automation engine with a horizontal frontend workspace.
 
-_(Alternatively, run `docker compose up -d` to launch the entire stack instantly via Docker)._
+**Vertical Automation Engine (Backend)**
 
-## 5. Quality Assurance & Testing Strategy
+1. **Ingestion (`/api/apply`):** Resumes are parsed via `src/lib/ai-service.js`.
+2. **AI Evaluation:** AI generates a 100-point fit score and detailed reasoning.
+3. **Knockout Rules:** `AutomationRule` models evaluate the score.
+4. **Event Dispatch:** `src/lib/automation-engine.js` creates `ActivityLog` entries and queues `DelayedTask` items (e.g., sending emails via a background worker).
 
-Code quality is strictly enforced to ensure the automation engine never misfires:
+**Horizontal Recruiter Workspace (Frontend Pipeline)**
 
-- **Pre-Commit Enforcement (Husky):** Every `git commit` is automatically intercepted by Husky and Lint-Staged. The system runs Prettier to format the code and executes the unit test suite. If any test fails, the commit is aborted.
-- **Automated Unit Testing (Jest):** The core business logic (`automation-engine.js`) is thoroughly covered by Jest tests using a fully Mocked Database, allowing reviewers to validate complex pipeline scenarios without corrupting local data.
-- **Formatting & Linting:** ESLint and Prettier guarantee uniformity across the entire codebase.
-  ```bash
-  # Run the test suite manually:
-  npm test
+- **Applied ➔ AI Screening:** Auto-advanced if Score > 60.
+- **Phone Screen:** Fast-tracked if Score > 85.
+- **Interview Loop:** Automated "Thank You" SLAs triggered post-interview.
+- **Offer Management:** Strict manual guardrails prevent AI from sending job offers.
+- **Hired / Rejected:** Updates requisition capacity and archives candidates.
 
-  # Format the code manually:
-  npm run format
-  ```
+## 🔐 Environment Variables
 
-## 6. The Automation Workflow (Deep Dive)
+Copy `.env.example` to `.env.local` to configure the application:
 
-At the heart of the ATS is the autonomous rules engine. Here is the lifecycle of how a candidate is evaluated:
+```env
+# AI Provider Settings ('mock' or 'claude')
+# In 'mock' mode, the system simulates AI evaluations to save API credits.
+AI_PROVIDER=mock
 
-1. **The Trigger:** A recruiter manually drags a candidate from "Applied" to "Phone Screening" on the Kanban board (or a candidate submits a new application via the public portal).
-2. **The API Handoff:** The Next.js API route (`PATCH /api/applications/[id]`) captures this stage change, updates the database, and immediately fires an event to `automation-engine.js`.
-3. **Rule Evaluation:** The engine queries the dynamic `automation_rules` database table to see if any active rules match the destination stage.
-4. **AI Scoring (If Applicable):** If the candidate is brand new, the engine optionally contacts the Anthropic API to analyze the resume against the job requirements, appending a match score out of 100 to the profile.
-5. **Execution & Guardrails:** If a matching rule exists (e.g., "Send Phone Screening Invite"), the engine validates it against the Guardrails. If the action is safe, it logs the email payload to the `activity_log` or schedules it in the `delayed_tasks` queue for the `worker.js` to physically dispatch later.
+# Anthropic API Key (Required if AI_PROVIDER='claude')
+ANTHROPIC_API_KEY=your_anthropic_api_key_here
+
+# Optional Database Override (defaults to file:./dev.db in Prisma)
+# DATABASE_URL=
+```
+
+## 🛡️ Quality Gates
+
+This repository enforces strict quality and formatting standards via Husky pre-commit hooks:
+
+- **Linting:** `npm run lint` (ESLint configuration in `eslint.config.mjs`)
+- **Formatting:** `npm run format` (Prettier configuration in `.prettierrc`)
+- **Testing:** `npm run test` (Jest test suite configured in `jest.config.mjs`, covering core Automation Engine logic in `__tests__/`)
+
+The `lint-staged` hook automatically runs `eslint --fix` and `prettier --write` against staged `.js`, `.jsx`, `.mjs`, `.json`, `.css`, and `.md` files before every commit.

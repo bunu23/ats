@@ -34,6 +34,7 @@ The system enforces SLAs (Service Level Agreements) for how long candidates can 
 
 When an application's stage is changed (e.g., dragged and dropped on the Kanban board) or created, the Automation Engine evaluates a dynamic, database-driven Rules Engine:
 
+- **100-Point AI Scoring**: AI evaluates resumes on a 100-point scale, autonomously mapping candidates directly into pipeline stages (e.g., `<59` locks to Read-Only Auto-Reject guardrail, `>85` fast-tracks to Phone Screening).
 - **Dynamic Rules (`db.automation_rules`)**: Executes configurable actions (e.g., `send_email` or `close_job`) automatically whenever a stage transition matches a rule's criteria.
 - **Phase 5 (Offer) Guardrail**: Explicitly blocks automated offer letters, requiring a recruiter to manually generate them.
 - **Late-Stage Rejection Guardrail**: Explicitly **blocks** automated emails for late-stage (Final Round) rejections, demanding a human touch.
@@ -51,14 +52,15 @@ The Candidates Database (`src/app/(dashboard)/candidates/page.js`) features a co
 ### 5. Settings & Mission Control UI
 
 - **Email Templates** (`src/app/(dashboard)/settings/page.js`): Clean dropdown interface to switch between configuring "Automated Templates" (pipeline triggers), "Manual Templates", and the "Recruiter Profile" (Calendly link).
-- **Mission Control (Activity & Emails)** (`src/app/(dashboard)/activity/page.js`): A centralized, two-column grid layout that categorizes system logs (Automated Actions, AI Emails, System Events) via accordions and highlights **High Priority Alerts** (e.g. guardrails, simulated Slack webhooks) in a dedicated red box, replacing obtrusive popup toasts.
+- **Mission Control (Activity & Emails)** (`src/app/(dashboard)/activity/page.js`): A centralized, two-column grid layout that categorizes system logs (Automated Actions, AI Emails, System Events) via accordions and highlights **High Priority Alerts** (e.g., SLA breaches, purple Slack webhooks) in a dedicated red box, replacing obtrusive popup toasts.
+- **Global Toast Queue (`SlackToastProvider`)**: Background poller that captures concurrent alerts (Slack messages, Emails) and stacks them dynamically in the corner without race conditions.
 
 ### 6. Public Careers Portal (`src/app/(public)/careers/page.js`)
 
 An external-facing job board allowing candidates to view open positions and apply directly.
 
-- **Magic Auto-Fill (Mock Resume Parser)**: Features a sleek drag-and-drop zone with a `dashed cyan` border and a scanning animation. Uses a mock API (`/api/parse-resume`) to auto-populate the form to demonstrate AI ingestion.
-- **Direct ATS Integration**: Form submissions hit the `/api/apply` endpoint, which dedupes candidate emails, logs the new application, and instantly triggers the **Automation Engine** for AI scoring and Phase 1 email rules.
+- **Magic Auto-Fill (Mock Resume Parser)**: Features a sleek drag-and-drop zone with a `dashed cyan` border and a scanning animation. Uses a dynamic mock API (`/api/parse-resume`) to extract candidate data directly from the uploaded filename (e.g., `Jane_Doe_Resume.pdf`) to demonstrate AI ingestion.
+- **Direct ATS Integration**: Form submissions hit the `/api/apply` endpoint, which dedupes candidate emails, logs the new application, and instantly triggers the **Automation Engine** for 100-point AI scoring and Phase 1 email rules.
 
 ### 7. Database Structure (Prisma & SQLite)
 

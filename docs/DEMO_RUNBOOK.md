@@ -36,20 +36,28 @@ This section walks you through the complete lifecycle of a candidate—from the 
 - **Action:** Open an Incognito window and navigate to `http://localhost:3000/careers`.
 - **The Hook:** Click on any Open Job. Demonstrate the **"Magic Auto-Fill"** feature.
 - **Talking Point:** _"Notice the glowing cyan box at the top? When a candidate uploads their resume, our AI instantly parses their document and maps it to our structured fields. It eliminates the dreaded 'upload your resume and then type it all out again' problem."_
+- **Demo Tip:** You can upload any PDF named `First_Last_Resume.pdf`. The dynamic AI parser will automatically extract the name from the filename instead of hardcoding a generic user, making the demo extremely realistic!
 - **Action:** Click the "Simulate AI Parse" button to watch the form magically populate, then hit submit!
 
 ### Step 2: 🤖 Instant AI Screening (Behind the Scenes)
 
 - **What Happens:** The moment the candidate submits, the application routes to `/api/apply`.
-- **The Automation:** The **Automation Engine** wakes up in the background. It evaluates the resume against the custom job description and generates a score out of 100 with detailed reasoning.
-- **Talking Point:** _"Before the recruiter even refreshes their page, the AI has already read the resume, scored it for fit, and placed the candidate in the 'Applied' pipeline stage."_
+- **The Automation:** The **Automation Engine** wakes up in the background. It evaluates the resume against the custom job description and generates a score out of 100 with detailed reasoning. The prompt that goes to the LLM requests scores on a 100-point scale so real AI API calls map perfectly to the pipeline rules.
+- **The Logic Engine:** Here is how the AI evaluating a new application now drives the pipeline automatically:
+  1. **Score < 59 (Below Threshold):** The candidate gets caught by the guardrail. They are flagged for rejection, and the system queues the "Empathy Delay" rejection email to automatically send 48 hours later.
+  2. **Score 60 to 85 (Good Fit):** The candidate is automatically advanced to the "Screening" column, prompting recruiters to review their application or send them a screening assignment.
+  3. **Score > 85 (Exceptional Fit):** The candidate is fast-tracked straight to the "Phone Screening" stage, bypassing the initial manual review.
+- **UI Highlight:** Point out the color-coded **AI Fit Badges** that appear on every candidate card and profile: 🟢 Exceptional Fit (Green), 🔵 Good Fit (Blue), and 🔴 Below Threshold (Red). This makes the pipeline visually skimmable.
+- **Talking Point:** _"Before the recruiter even refreshes their page, the AI has already read the resume, scored it for fit, and autonomously driven the pipeline—either fast-tracking top talent or respectfully pausing unqualified applicants."_
 
-### Step 3: 📞 Phone Screening & Autonomous Outreach
+### Step 3: 📞 Pipeline Guardrails & Autonomous Outreach
 
 - **Action:** Back in the Recruiter Dashboard, open the **Pipeline** tab.
-- **Action:** Grab the newly applied candidate card and drag it into the **"Phone Screening"** column.
-- **The Hook:** _"Watch what happens when I drop this card. The system detects the stage change and triggers an autonomous background rule."_
-- **What Happens:** The system immediately drafts and sends a personalized "Phone Screening Invite" email to the candidate, injecting your Calendly link!
+- **The Guardrail Hook:** Try to drag a candidate with a **Red Badge (< 60 Score)**. The card is visually dimmed, the cursor turns to a 🚫, and dragging is disabled!
+- **Talking Point:** _"Our AI doesn't just make suggestions; it enforces compliance. Below-threshold candidates are locked into the Auto-Reject flow and cannot be manually dragged forward by a recruiter, enforcing our strict hiring standards."_
+- **Action:** Grab a qualified candidate card and drag it into the **"Phone Screening"** column.
+- **The Automation Hook:** _"Watch what happens when I drop this card. The system detects the stage change and triggers an autonomous background rule."_
+- **What Happens:** Without refreshing the page, a sleek **Blue Email Toast** (✉️) will pop up at the bottom right of the screen confirming a personalized Calendly invite was drafted and sent to the candidate.
 
 ### Step 4: 📅 The Interview Stage & Guardrails
 
@@ -79,12 +87,12 @@ To prove that the AI isn't operating in a "black box," you can show stakeholders
 ### 1. 🎛️ Mission Control (Activity & Emails)
 
 - **Action:** Click the **"Activity & Emails"** tab in the sidebar.
-- **The Hook:** Show off the beautiful two-column dashboard.
-- **Talking Point:** _"This is Mission Control. Instead of annoying popup toasts, all background AI operations are quietly logged here."_
+- **The Hook:** Show off the beautiful two-column dashboard with sticky headers and smoothly scrolling content.
+- **Talking Point:** _"This is Mission Control. Instead of annoying popup toasts, all background AI operations are quietly and accurately logged here."_
 - **Demo:**
-  - Expand the **Automated Actions** accordion to show the raw AI Score and evaluation paragraph generated during Step 2.
+  - Expand the **Automated Actions** accordion to show the raw AI Score and evaluation paragraph generated during Step 2. Notice that the delayed rejections correctly route here instead of cluttering urgent alerts.
   - Expand the **AI-Generated Emails** accordion to prove the system sent the Phone Screen invite.
-  - Point out the glowing red **High Priority Alerts** box on the right, which catches SLA breaches and simulated Slack Webhooks.
+  - Point out the glowing red **High Priority Alerts** box on the right, which catches SLA breaches. Notice the sleek **Purple** styling for Slack webhook notifications, differentiating them from urgent system errors!
 
 ### 2. 🗂️ Candidate Command Center
 
