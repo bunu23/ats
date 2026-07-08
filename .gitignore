@@ -39,8 +39,7 @@ yarn-error.log*
 .env.production
 # .env.example is intentionally NOT ignored — it's a safe template for developers
 
-# Candidate data — contains PII (names, emails, applications)
-# NEVER commit this to a public repo
+# Candidate data
 data/ats-data.json
 
 
