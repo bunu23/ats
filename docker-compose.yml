@@ -1,0 +1,38 @@
+version: '3.8'
+
+services:
+  web:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: ats-web
+    command: npm start
+    ports:
+      - '3000:3000'
+    volumes:
+      - ats-data:/app/data
+    env_file:
+      - .env.local
+    environment:
+      - NODE_ENV=production
+    restart: unless-stopped
+
+  worker:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: ats-worker
+    command: node worker.js
+    volumes:
+      - ats-data:/app/data
+    env_file:
+      - .env.local
+    environment:
+      - NODE_ENV=production
+    restart: unless-stopped
+    depends_on:
+      - web
+
+volumes:
+  ats-data:
+    name: ats-shared-data
