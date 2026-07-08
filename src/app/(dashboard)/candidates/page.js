@@ -1,7 +1,7 @@
 'use client';
 import { useState, useEffect } from 'react';
-import CandidateTable from '../../../components/candidates/CandidateTable';
-import CandidateModal from '../../../components/candidates/CandidateModal';
+import CandidateTable from './components/CandidateTable';
+import CandidateModal from './components/CandidateModal';
 
 export default function Candidates() {
   const [candidates, setCandidates] = useState([]);

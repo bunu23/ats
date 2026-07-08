@@ -1,12 +1,14 @@
 :root {
-  --bg-primary: #121212;
-  --bg-secondary: #1e1e1e;
-  --bg-glass: rgba(30, 30, 30, 0.7);
-  --text-primary: #ffffff;
-  --text-secondary: #a0a0a0;
-  --accent-primary: #3b82f6;
-  --accent-hover: #2563eb;
-  --border-color: #333333;
+  --bg-primary: #050810;
+  --bg-secondary: rgba(15, 23, 42, 0.6);
+  --bg-glass: rgba(15, 23, 42, 0.4);
+  --bg-glass-hover: rgba(20, 30, 55, 0.6);
+  --text-primary: #f8fafc;
+  --text-secondary: #94a3b8;
+  --accent-primary: #38bdf8;
+  --accent-hover: #0ea5e9;
+  --border-color: rgba(255, 255, 255, 0.1);
+  --border-hover: rgba(255, 255, 255, 0.2);
   --success: #10b981;
   --warning: #f59e0b;
   --danger: #ef4444;
@@ -22,6 +24,11 @@
 
 body {
   background-color: var(--bg-primary);
+  background-image:
+    radial-gradient(circle at 15% 50%, rgba(30, 58, 138, 0.25), transparent 50%),
+    radial-gradient(circle at 85% 30%, rgba(139, 92, 246, 0.15), transparent 50%),
+    radial-gradient(circle at 50% 80%, rgba(14, 165, 233, 0.15), transparent 50%);
+  background-attachment: fixed;
   color: var(--text-primary);
   font-family: var(--font-family);
   line-height: 1.5;
@@ -37,6 +44,8 @@ body {
 .sidebar {
   width: 250px;
   background-color: var(--bg-secondary);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
   border-right: 1px solid var(--border-color);
   padding: 2rem 1rem;
   display: flex;
@@ -65,8 +74,10 @@ body {
 
 .nav-link:hover,
 .nav-link.active {
-  background-color: rgba(59, 130, 246, 0.1);
+  background-color: rgba(56, 189, 248, 0.15);
   color: var(--accent-primary);
+  border: 1px solid rgba(56, 189, 248, 0.2);
+  box-shadow: inset 0 0 10px rgba(56, 189, 248, 0.05);
 }
 
 .main-content {
@@ -91,24 +102,28 @@ h2 {
 /* Cards & Glassmorphism */
 .glass-card {
   background: var(--bg-glass);
-  backdrop-filter: blur(10px);
-  -webkit-backdrop-filter: blur(10px);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
   border: 1px solid var(--border-color);
   border-radius: 1rem;
   padding: 1.5rem;
   box-shadow:
-    0 4px 6px -1px rgba(0, 0, 0, 0.1),
-    0 2px 4px -1px rgba(0, 0, 0, 0.06);
+    0 8px 32px 0 rgba(0, 0, 0, 0.3),
+    inset 0 1px 1px rgba(255, 255, 255, 0.05);
   transition:
-    transform 0.2s ease,
-    box-shadow 0.2s ease;
+    transform 0.3s cubic-bezier(0.4, 0, 0.2, 1),
+    box-shadow 0.3s cubic-bezier(0.4, 0, 0.2, 1),
+    background 0.3s ease,
+    border-color 0.3s ease;
 }
 
 .glass-card:hover {
-  transform: translateY(-2px);
+  transform: translateY(-4px);
+  background: var(--bg-glass-hover);
   box-shadow:
-    0 10px 15px -3px rgba(0, 0, 0, 0.1),
-    0 4px 6px -2px rgba(0, 0, 0, 0.05);
+    0 12px 40px 0 rgba(0, 0, 0, 0.4),
+    inset 0 1px 1px rgba(255, 255, 255, 0.1);
+  border-color: var(--border-hover);
 }
 
 /* Grid Layouts */
@@ -162,18 +177,23 @@ h2 {
 }
 
 .kanban-card {
-  background-color: var(--bg-primary);
+  background: var(--bg-glass);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
   border: 1px solid var(--border-color);
-  border-radius: 0.5rem;
+  border-radius: 0.75rem;
   padding: 1rem;
   margin-bottom: 1rem;
   cursor: grab;
   transition: all 0.2s ease;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
 }
 
 .kanban-card:hover {
   border-color: var(--accent-primary);
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
+  background: var(--bg-glass-hover);
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.4);
+  transform: translateY(-2px);
 }
 
 .kanban-card:active {
@@ -255,12 +275,15 @@ h2 {
 }
 
 .btn-primary {
-  background-color: var(--accent-primary);
+  background: linear-gradient(135deg, var(--accent-primary), var(--accent-hover));
   color: white;
+  box-shadow: 0 4px 14px 0 rgba(56, 189, 248, 0.39);
+  border: 1px solid rgba(255, 255, 255, 0.1);
 }
 
 .btn-primary:hover {
-  background-color: var(--accent-hover);
+  transform: translateY(-1px);
+  box-shadow: 0 6px 20px rgba(56, 189, 248, 0.4);
 }
 
 .btn-secondary {

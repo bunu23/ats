@@ -1,6 +1,6 @@
 'use client';
 import { useState, useEffect } from 'react';
-import KanbanBoard from '../../../components/pipeline/KanbanBoard';
+import KanbanBoard from './components/KanbanBoard';
 
 export default function Pipeline() {
   const [jobs, setJobs] = useState([]);
