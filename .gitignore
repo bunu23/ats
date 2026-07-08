@@ -30,8 +30,24 @@ yarn-debug.log*
 yarn-error.log*
 .pnpm-debug.log*
 
-# env files (can opt-in for committing if needed)
-.env*
+# env files — ignore real secret files, but commit the safe template
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+.env.production
+# .env.example is intentionally NOT ignored — it's a safe template for developers
+
+# Candidate data — contains PII (names, emails, applications)
+# NEVER commit this to a public repo
+data/ats-data.json
+
+# Internal AI agent configuration and skills (not for public)
+.agents/
+
+# Internal architecture documentation
+CLAUDE.md
 
 # vercel
 .vercel
