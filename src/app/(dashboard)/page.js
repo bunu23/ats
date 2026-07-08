@@ -181,7 +181,7 @@ export default function Dashboard() {
       <h2>Recent Activity (Global)</h2>
       <div className="glass-card">
         <div className="activity-list">
-          {stats.recentActivity.map(activity => (
+          {stats.recentActivity.slice(0, 5).map(activity => (
             <div key={activity.id} className="activity-item">
               <div className="activity-icon">
                 {activity.type === 'email_sent'

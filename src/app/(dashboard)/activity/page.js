@@ -185,11 +185,45 @@ export default function Activity() {
                                   marginBottom: '0.5rem'
                                 }}
                               >
-                                System Metadata:
+                                Event Details:
                               </strong>
-                              <pre style={{ margin: 0, whiteSpace: 'pre-wrap', overflowX: 'auto' }}>
-                                {JSON.stringify(meta, null, 2)}
-                              </pre>
+                              <div
+                                style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}
+                              >
+                                {Object.entries(meta).map(([key, value]) => (
+                                  <div
+                                    key={key}
+                                    style={{
+                                      display: 'flex',
+                                      alignItems: 'flex-start',
+                                      gap: '0.5rem'
+                                    }}
+                                  >
+                                    <span
+                                      style={{
+                                        color: 'var(--text-secondary)',
+                                        fontWeight: 600,
+                                        minWidth: '100px'
+                                      }}
+                                    >
+                                      {key
+                                        .replace(/_/g, ' ')
+                                        .replace(/\b\w/g, l => l.toUpperCase())}
+                                      :
+                                    </span>
+                                    <span
+                                      style={{
+                                        color: 'var(--text-primary)',
+                                        wordBreak: 'break-word'
+                                      }}
+                                    >
+                                      {typeof value === 'object'
+                                        ? JSON.stringify(value)
+                                        : String(value)}
+                                    </span>
+                                  </div>
+                                ))}
+                              </div>
                             </div>
                           )}
                       </div>

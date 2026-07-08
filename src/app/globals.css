@@ -38,7 +38,8 @@ body {
 /* Layout */
 .app-container {
   display: flex;
-  min-height: 100vh;
+  height: 100vh;
+  overflow: hidden;
 }
 
 .sidebar {
@@ -50,6 +51,8 @@ body {
   padding: 2rem 1rem;
   display: flex;
   flex-direction: column;
+  height: 100vh;
+  overflow-y: auto;
 }
 
 .sidebar-title {
@@ -84,6 +87,7 @@ body {
   flex: 1;
   padding: 2rem;
   overflow-y: auto;
+  height: 100vh;
 }
 
 /* Typography */

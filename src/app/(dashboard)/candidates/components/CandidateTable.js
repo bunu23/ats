@@ -148,7 +148,8 @@ export default function CandidateTable({ filteredCandidates, getCandidateAppInfo
                       borderRadius: '9999px',
                       fontSize: '0.75rem',
                       fontWeight: 700,
-                      letterSpacing: '0.05em'
+                      letterSpacing: '0.05em',
+                      whiteSpace: 'nowrap'
                     }}
                   >
                     {appInfo.stage}
