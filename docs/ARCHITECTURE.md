@@ -7,7 +7,7 @@ This document outlines the software engineering principles, architectural decisi
 The codebase is strictly divided into functional layers to ensure maintainability and testability. Changes in one layer (e.g., swapping the database) will not require changes in other layers (e.g., business logic).
 
 - **Presentation Layer (`src/app/`)**:
-  Built with Next.js App Router (React). This layer is purely responsible for UI rendering, CSS styling, and managing client-side state. It does not contain direct database queries or AI API calls.
+  Built with Next.js App Router (React). This layer is purely responsible for UI rendering, CSS styling, and managing client-side state. It utilizes route colocation for components (components are stored alongside their respective routes) and features a global dark glassmorphic UI. It does not contain direct database queries or AI API calls.
 - **Controller Layer (`src/app/api/`)**:
   Next.js Route Handlers act as the API controllers. They parse incoming HTTP requests, validate payloads, and delegate the work to the underlying business logic.
 - **Business Logic Layer (`src/lib/automation-engine.js`)**:

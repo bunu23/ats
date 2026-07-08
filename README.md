@@ -9,6 +9,7 @@ Hiring is often bottlenecked by administrative overhead—scheduling, sending up
 To ensure the application remains scalable, testable, and lightning-fast, we adopted a strictly decoupled architecture:
 
 - **Separation of Concerns:** The frontend (Next.js App Router UI), the data access layer (`src/lib/db.js`), and the business logic (`src/lib/automation-engine.js`) are entirely separated. This means the UI is never bogged down by complex business rules, and the database can be swapped without rewriting the engine.
+- **Modern UI Design:** Features a global dark glassmorphic design system that provides a premium and responsive user experience.
 - **Asynchronous Background Worker:** All heavy lifting—such as dispatching emails or scheduling 48-hour delayed rejections—is offloaded to a standalone Node.js process (`worker.js`). This ensures that the primary UI and API routes respond instantly to recruiter actions (like dragging and dropping Kanban cards), while the rules engine evaluates the automation consequences in the background.
 - **Dependency Injection:** The automation engine receives its database client via parameter injection, making it highly modular and effortlessly mockable during unit testing.
 
@@ -27,7 +28,7 @@ Get the application running in minutes:
 
 ### Prerequisites
 
-- Node.js (v18+)
+- Node.js (v22+)
 - npm
 - Docker & Docker Compose (Optional, for containerized deployment)
 
