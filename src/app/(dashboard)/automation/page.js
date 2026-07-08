@@ -34,10 +34,12 @@ export default function Automation() {
 
   return (
     <div>
-      <h1>Automation Rules</h1>
-      <p style={{ color: 'var(--text-secondary)', marginBottom: '2rem' }}>
-        Configure how the ATS automates your recruitment workflows using AI and event triggers.
-      </p>
+      <div className="sticky-header">
+        <h1 style={{ marginBottom: '0.5rem' }}>Automation Rules</h1>
+        <p style={{ color: 'var(--text-secondary)', margin: 0 }}>
+          Configure how the ATS automates your recruitment workflows using AI and event triggers.
+        </p>
+      </div>
 
       <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
         {rules.map(rule => (

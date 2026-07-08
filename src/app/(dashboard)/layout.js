@@ -55,7 +55,32 @@ export default function DashboardLayout({ children }) {
           </a>
         </div>
       </aside>
-      <main className="main-content">{children}</main>
+      <main
+        className="main-content"
+        style={{
+          display: 'flex',
+          flexDirection: 'column',
+          height: '100vh',
+          padding: 0,
+          overflow: 'hidden'
+        }}
+      >
+        <div style={{ flex: 1, overflowY: 'auto', padding: '2rem' }}>{children}</div>
+        <footer
+          style={{
+            textAlign: 'center',
+            padding: '1rem',
+            color: 'var(--text-secondary)',
+            fontSize: '0.875rem',
+            borderTop: '1px solid rgba(255,255,255,0.05)',
+            background: 'rgba(2, 6, 23, 0.8)',
+            backdropFilter: 'blur(12px)',
+            flexShrink: 0
+          }}
+        >
+          Copyright &copy; 2026 Bunu Bhattarai. All rights reserved.
+        </footer>
+      </main>
     </div>
   );
 }

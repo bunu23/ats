@@ -155,12 +155,8 @@ export default function Jobs() {
   return (
     <div>
       <div
-        style={{
-          display: 'flex',
-          justifyContent: 'space-between',
-          alignItems: 'flex-start',
-          marginBottom: '2rem'
-        }}
+        className="sticky-header"
+        style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}
       >
         <div>
           <h1>Job Postings</h1>

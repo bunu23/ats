@@ -59,12 +59,8 @@ export default function Dashboard() {
   return (
     <div>
       <div
-        style={{
-          display: 'flex',
-          justifyContent: 'space-between',
-          alignItems: 'center',
-          marginBottom: '2rem'
-        }}
+        className="sticky-header"
+        style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}
       >
         <div>
           <h1>Dashboard</h1>

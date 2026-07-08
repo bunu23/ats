@@ -16,27 +16,41 @@ export async function POST(request) {
     // Simulate AI parsing delay
     await new Promise(resolve => setTimeout(resolve, 1500));
 
-    // Return a mock parsed payload
+    // Try to extract a name from the file name (e.g., "Jane_Doe_Resume.pdf" -> "Jane Doe")
+    let extractedName = 'Alex Developer';
+    if (file.name) {
+      const baseName = file.name.split('.')[0];
+      const cleaned = baseName
+        .replace(/[-_]/g, ' ')
+        .replace(/resume|cv|document/gi, '')
+        .trim();
+      if (cleaned) {
+        extractedName = cleaned.replace(/\b\w/g, c => c.toUpperCase());
+      }
+    }
+    const extractedEmail = extractedName.toLowerCase().replace(/\s+/g, '.') + '@example.com';
+
+    // Return a mock parsed payload dynamically based on file name
     return NextResponse.json(
       {
         success: true,
         data: {
-          name: 'Alex Developer',
-          email: 'alex.dev@example.com',
+          name: extractedName,
+          email: extractedEmail,
           phone: '+1 555-0198',
           experience_years: '4',
           education: 'B.S. Computer Science, Tech University',
           skills: 'React, Node.js, Next.js, TypeScript, GraphQL, Python',
           resume_text: `[Extracted from ${file.name}]
 
-Alex Developer
-alex.dev@example.com | +1 555-0198
+${extractedName}
+${extractedEmail} | +1 555-0198
 
 SUMMARY
-Passionate full-stack developer with 4 years of experience building scalable web applications.
+Passionate professional with 4 years of experience building scalable applications.
 
 EXPERIENCE
-Senior Frontend Engineer | Tech Innovators Inc. (2020 - Present)
+Senior Engineer | Tech Innovators Inc. (2020 - Present)
 - Led the migration of legacy SPA to Next.js, improving load times by 40%.
 - Mentored junior developers and instituted code review best practices.
 

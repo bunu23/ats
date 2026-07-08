@@ -317,7 +317,7 @@ export default function Activity() {
 
   return (
     <div>
-      <div style={{ marginBottom: '2rem' }}>
+      <div className="sticky-header" style={{ marginBottom: '2rem' }}>
         <h1 style={{ marginBottom: '0.5rem' }}>Mission Control</h1>
         <p style={{ color: 'var(--text-secondary)', margin: 0 }}>
           Centralized hub for all background activities, AI operations, and critical alerts.
