@@ -4,7 +4,7 @@
 
 ## Architecture
 - Next.js 16 App Router (JavaScript)
-- JSON File storage via `data/ats-data.json` for persistence
+- Prisma ORM backed by SQLite (`prisma/dev.db`) for persistence
 - AI service layer with mock/real LLM support
 - Event-driven automation engine via Dependency Injection
 
