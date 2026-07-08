@@ -30,7 +30,7 @@ export async function POST(request) {
     // Log the manual scoring action
     await addActivityLog({
       type: 'ai_scoring',
-      title: `Manual AI Score: ${application.candidate_name} — ${score.overallScore}/10`,
+      title: `Manual AI Score: ${application.candidate_name} — ${score.overallScore}/100`,
       description: score.recommendation,
       metadata: { score, automated: false },
       application_id: applicationId,

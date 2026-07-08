@@ -139,8 +139,10 @@ const ActivityItem = ({ log, expandedId, setExpandedId }) => {
                   }}
                 >
                   <div style={{ marginBottom: '1rem' }}>
-                    <strong style={{ color: 'var(--text-secondary)' }}>AI Score:</strong>{' '}
-                    {meta.score?.overallScore || meta.score}/10
+                    <strong style={{ color: 'var(--text-secondary)' }}>AI Score:</strong>
+                    <span className="font-bold text-white ml-1">
+                      {meta.score?.overallScore || meta.score}/100
+                    </span>
                   </div>
                   <div>
                     <strong style={{ color: 'var(--text-secondary)' }}>Evaluation Details:</strong>

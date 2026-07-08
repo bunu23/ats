@@ -39,8 +39,6 @@ This section walks you through the complete lifecycle of a candidate—from the 
 - **Demo Tip:** You can upload any PDF named `First_Last_Resume.pdf`. The dynamic AI parser will automatically extract the name from the filename instead of hardcoding a generic user, making the demo extremely realistic!
 - **Action:** Click the "Simulate AI Parse" button to watch the form magically populate, then hit submit!
 
-![Careers Portal](./images/08_Careers_Portal.png)
-
 ### Step 2: 🤖 Instant AI Screening (Behind the Scenes)
 
 - **What Happens:** The moment the candidate submits, the application routes to `/api/apply`.
@@ -51,8 +49,6 @@ This section walks you through the complete lifecycle of a candidate—from the 
   3. **Score > 85 (Exceptional Fit):** The candidate is fast-tracked straight to the "Phone Screening" stage, bypassing the initial manual review.
 - **UI Highlight:** Point out the color-coded **AI Fit Badges** that appear on every candidate card and profile: 🟢 Exceptional Fit (Green), 🔵 Good Fit (Blue), and 🔴 Below Threshold (Red). This makes the pipeline visually skimmable.
 - **Talking Point:** _"Before the recruiter even refreshes their page, the AI has already read the resume, scored it for fit, and autonomously driven the pipeline—either fast-tracking top talent or respectfully pausing unqualified applicants."_
-
-![Pipeline Kanban](./images/02_Pipeline_Kanban.png)
 
 ### Step 3: 📞 Pipeline Guardrails & Autonomous Outreach
 
@@ -82,8 +78,6 @@ This section walks you through the complete lifecycle of a candidate—from the 
 - **What Happens:** The candidate is moved to **"Hired"**!
 - **Talking Point:** _"The candidate is officially hired. But our system goes one step further. If you go back to the 'Jobs' dashboard, you'll see this requisition has been automatically marked as 'Closed' because the headcount was fulfilled."_
 
-![Jobs List](./images/06_Jobs.png)
-
 ---
 
 ## 🔎 Part 3: Stakeholder Review & Audit Trails
@@ -100,8 +94,6 @@ To prove that the AI isn't operating in a "black box," you can show stakeholders
   - Expand the **AI-Generated Emails** accordion to prove the system sent the Phone Screen invite.
   - Point out the glowing red **High Priority Alerts** box on the right, which catches SLA breaches. Notice the sleek **Purple** styling for Slack webhook notifications, differentiating them from urgent system errors!
 
-![Mission Control](./images/04_Mission_Control.png)
-
 ### 2. 🗂️ Candidate Command Center
 
 - **Action:** Go to the **Candidates** tab and click the **"📁 Profile"** button on any candidate.
@@ -109,8 +101,6 @@ To prove that the AI isn't operating in a "black box," you can show stakeholders
 - **Demo:**
   - Point out the **Right Column Audit Log**. Show how every single stage movement is tracked and permanently tagged by whether a **HUMAN**, **SYSTEM**, or **AI AGENT** triggered it.
   - Show the **Interviewer Reviews Hub**, where team members can drop their notes for hiring managers to review.
-
-![Candidate Database](./images/03_Candidate_Database.png)
 
 ---
 

@@ -51,18 +51,67 @@ export async function processStageChange(db, applicationId, fromStage, toStage) 
     results.push({ action: 'slack_notification_sent' });
   }
 
+  // Mock AI Screening Invite
+  if (toStageLower === 'ai screening') {
+    const tpl = settings.email_templates.ai_screening_invite;
+    if (tpl) {
+      await db.addActivityLog({
+        type: 'email_sent',
+        title: parseTemplate(tpl.subject, templateVars),
+        description: parseTemplate(tpl.body, templateVars),
+        metadata: { to: application.candidate_email, automated: true },
+        application_id: applicationId,
+        job_id: application.job_id,
+        candidate_id: application.candidate_id
+      });
+      results.push({ action: 'ai_screening_invite_sent' });
+    }
+  }
+
   // Mock Phone Screening Invite
   if (toStageLower === 'phone screening') {
-    await db.addActivityLog({
-      type: 'email_sent',
-      title: `Interview Invite: Phone Screen with ${application.candidate_name}`,
-      description: `Hi ${application.candidate_name},\n\nWe'd love to schedule a quick 30-minute phone screen with you to discuss your background and the ${application.job_title} role.\n\nPlease pick a time here: ${templateVars.calendly_link || 'https://calendly.com/recruiter'}\n\nBest,\nThe Recruiting Team`,
-      metadata: { to: application.candidate_email, automated: true },
-      application_id: applicationId,
-      job_id: application.job_id,
-      candidate_id: application.candidate_id
-    });
-    results.push({ action: 'phone_screen_invite_sent' });
+    const tpl = settings.email_templates.phone_screening_invite;
+    if (tpl) {
+      await db.addActivityLog({
+        type: 'email_sent',
+        title: parseTemplate(tpl.subject, templateVars),
+        description: parseTemplate(tpl.body, templateVars),
+        metadata: { to: application.candidate_email, automated: true },
+        application_id: applicationId,
+        job_id: application.job_id,
+        candidate_id: application.candidate_id
+      });
+      results.push({ action: 'phone_screen_invite_sent' });
+    } else {
+      // Fallback
+      await db.addActivityLog({
+        type: 'email_sent',
+        title: `Interview Invite: Phone Screen with ${application.candidate_name}`,
+        description: `Hi ${application.candidate_name},\n\nWe'd love to schedule a quick phone screen.\n\nPlease pick a time here: ${templateVars.calendly_link || 'https://calendly.com'}\n\nBest,\nThe Recruiting Team`,
+        metadata: { to: application.candidate_email, automated: true },
+        application_id: applicationId,
+        job_id: application.job_id,
+        candidate_id: application.candidate_id
+      });
+      results.push({ action: 'phone_screen_invite_sent' });
+    }
+  }
+
+  // Mock Interview Invite (in addition to the existing Slack Webhook above)
+  if (toStageLower === 'interview') {
+    const tpl = settings.email_templates.interview_invite;
+    if (tpl) {
+      await db.addActivityLog({
+        type: 'email_sent',
+        title: parseTemplate(tpl.subject, templateVars),
+        description: parseTemplate(tpl.body, templateVars),
+        metadata: { to: application.candidate_email, automated: true },
+        application_id: applicationId,
+        job_id: application.job_id,
+        candidate_id: application.candidate_id
+      });
+      results.push({ action: 'interview_invite_sent' });
+    }
   }
 
   // PHASE 5: The Offer Stage Guardrail

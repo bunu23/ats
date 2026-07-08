@@ -5,105 +5,224 @@ import {
   createAutomationRule
 } from '../src/lib/db.js';
 
-// Setup default automation rules
-console.log('Setting up automation rules...');
-createAutomationRule({
-  name: 'Auto Follow-up Email',
-  description: 'Automatically generate and send follow-up emails when candidates change stages.',
-  trigger_type: 'stage_change',
-  action_type: 'send_followup',
-  enabled: true
-});
+async function seed() {
+  // Setup default automation rules
+  console.log('Setting up automation rules...');
+  await createAutomationRule({
+    name: 'Auto Follow-up Email',
+    description: 'Automatically generate and send follow-up emails when candidates change stages.',
+    trigger_type: 'stage_change',
+    action_type: 'send_followup',
+    enabled: true
+  });
 
-createAutomationRule({
-  name: 'Auto-score Candidates',
-  description: 'Evaluate candidates with AI as soon as they apply.',
-  trigger_type: 'application_created',
-  action_type: 'auto_score',
-  enabled: true
-});
+  await createAutomationRule({
+    name: 'Auto-score Candidates',
+    description: 'Evaluate candidates with AI as soon as they apply.',
+    trigger_type: 'application_created',
+    action_type: 'auto_score',
+    enabled: true
+  });
 
-createAutomationRule({
-  name: 'Notify Hiring Manager',
-  description: 'Notify the hiring manager when a candidate reaches the Interview stage.',
-  trigger_type: 'stage_change',
-  action_type: 'notify_manager',
-  enabled: true
-});
+  await createAutomationRule({
+    name: 'Notify Hiring Manager',
+    description: 'Notify the hiring manager when a candidate reaches the Interview stage.',
+    trigger_type: 'stage_change',
+    action_type: 'notify_manager',
+    enabled: true
+  });
 
-console.log('Creating jobs...');
-const frontendJob = createJob({
-  title: 'Senior Frontend Developer',
-  department: 'Engineering',
-  location: 'Remote',
-  type: 'Full-time',
-  description:
-    'We are looking for an experienced frontend developer to build exceptional user experiences.',
-  requirements: 'React, Next.js, TypeScript, CSS, 5+ years experience',
-  salary_range: '$120,000 - $150,000'
-});
+  console.log('Creating jobs...');
+  const frontendJob = await createJob({
+    title: 'Senior Frontend Developer',
+    department: 'Engineering',
+    location: 'Remote',
+    type: 'Full-time',
+    description:
+      'We are looking for an experienced frontend developer to build exceptional user experiences.',
+    requirements: 'React, Next.js, TypeScript, CSS, 5+ years experience',
+    salary_range: '$120,000 - $150,000'
+  });
 
-const productJob = createJob({
-  title: 'Product Manager',
-  department: 'Product',
-  location: 'New York, NY',
-  type: 'Full-time',
-  description: 'Lead the product strategy for our core recruitment tools.',
-  requirements: 'Agile, B2B SaaS experience, 3+ years experience',
-  salary_range: '$130,000 - $160,000'
-});
+  const productJob = await createJob({
+    title: 'Product Manager',
+    department: 'Product',
+    location: 'New York, NY',
+    type: 'Full-time',
+    description: 'Lead the product strategy for our core recruitment tools.',
+    requirements: 'Agile, B2B SaaS experience, 3+ years experience',
+    salary_range: '$130,000 - $160,000'
+  });
 
-console.log('Creating candidates...');
-const candidate1 = createCandidate({
-  name: 'Alex Johnson',
-  email: 'alex.j@example.com',
-  phone: '555-0101',
-  skills: 'React, Next.js, Node.js, TypeScript, TailwindCSS',
-  experience_years: 6,
-  education: 'BS Computer Science',
-  resume_text:
-    'Experienced software engineer specializing in frontend development. Built scalable web applications for 3 startups.'
-});
+  console.log('Creating candidates and applications...');
 
-const candidate2 = createCandidate({
-  name: 'Sarah Smith',
-  email: 'sarah.smith@example.com',
-  phone: '555-0102',
-  skills: 'Product strategy, Agile, Jira, Figma, Data analysis',
-  experience_years: 4,
-  education: 'MBA',
-  resume_text:
-    'Product manager with a track record of successfully launching B2B SaaS products. Certified Scrum Master.'
-});
+  // Frontend Job Candidates
+  const feCandidates = [
+    {
+      name: 'Alex Johnson',
+      email: 'alex.j@example.com',
+      phone: '555-0101',
+      skills: 'React, Next.js, Node.js',
+      experience_years: 6,
+      education: 'BS CS',
+      resume_text: 'Experienced frontend dev',
+      stage: 'Interview'
+    },
+    {
+      name: 'Michael Chang',
+      email: 'm.chang@example.com',
+      phone: '555-0103',
+      skills: 'React, JavaScript, CSS',
+      experience_years: 2,
+      education: 'Bootcamp',
+      resume_text: 'Junior frontend dev',
+      stage: 'Applied'
+    },
+    {
+      name: 'Emily Davis',
+      email: 'emily.d@example.com',
+      phone: '555-0104',
+      skills: 'Vue, React, TypeScript',
+      experience_years: 4,
+      education: 'BS CS',
+      resume_text: 'Mid-level frontend engineer',
+      stage: 'Screening'
+    },
+    {
+      name: 'John Smith',
+      email: 'john.s@example.com',
+      phone: '555-0105',
+      skills: 'Angular, React, Node',
+      experience_years: 8,
+      education: 'MS CS',
+      resume_text: 'Senior web developer',
+      stage: 'Offer'
+    },
+    {
+      name: 'Jessica Taylor',
+      email: 'jessica.t@example.com',
+      phone: '555-0106',
+      skills: 'HTML, CSS, JS',
+      experience_years: 1,
+      education: 'Self-taught',
+      resume_text: 'Enthusiastic beginner',
+      stage: 'Rejected'
+    }
+  ];
 
-const candidate3 = createCandidate({
-  name: 'Michael Chang',
-  email: 'm.chang@example.com',
-  phone: '555-0103',
-  skills: 'React, Redux, JavaScript, HTML, CSS',
-  experience_years: 2,
-  education: 'Coding Bootcamp Graduate',
-  resume_text:
-    'Passionate junior frontend developer looking for my next challenge. Strong eye for design.'
-});
+  for (const c of feCandidates) {
+    const candidate = await createCandidate({
+      name: c.name,
+      email: c.email,
+      phone: c.phone,
+      skills: c.skills,
+      experience_years: c.experience_years,
+      education: c.education,
+      resume_text: c.resume_text
+    });
 
-console.log('Creating applications...');
-createApplication({
-  job_id: frontendJob.id,
-  candidate_id: candidate1.id,
-  stage: 'Interview'
-});
+    // Generate scores from 40 to 100 to test all 3 badge colors (Red, Blue, Green)
+    const score = Math.floor(Math.random() * 61) + 40;
+    let finalStage = c.stage;
+    if (score < 60 && finalStage !== 'Rejected') {
+      finalStage = 'Applied'; // Guardrail: poor fits cannot advance past Applied
+    }
 
-createApplication({
-  job_id: productJob.id,
-  candidate_id: candidate2.id,
-  stage: 'Screening'
-});
+    await createApplication({
+      job_id: frontendJob.id,
+      candidate_id: candidate.id,
+      stage: finalStage,
+      ai_score: score
+    });
+  }
 
-createApplication({
-  job_id: frontendJob.id,
-  candidate_id: candidate3.id,
-  stage: 'Applied'
-});
+  // Product Job Candidates
+  const pmCandidates = [
+    {
+      name: 'Sarah Smith',
+      email: 'sarah.smith@example.com',
+      phone: '555-0102',
+      skills: 'Product strategy, Agile',
+      experience_years: 4,
+      education: 'MBA',
+      resume_text: 'Track record in SaaS',
+      stage: 'Screening'
+    },
+    {
+      name: 'David Kim',
+      email: 'david.k@example.com',
+      phone: '555-0201',
+      skills: 'Jira, Scum, Product Management',
+      experience_years: 5,
+      education: 'BS Business',
+      resume_text: 'Data-driven PM',
+      stage: 'Interview'
+    },
+    {
+      name: 'Laura Wilson',
+      email: 'laura.w@example.com',
+      phone: '555-0202',
+      skills: 'Figma, User Research, SQL',
+      experience_years: 3,
+      education: 'BA Psychology',
+      resume_text: 'Focus on user experience',
+      stage: 'Applied'
+    },
+    {
+      name: 'James Brown',
+      email: 'james.b@example.com',
+      phone: '555-0203',
+      skills: 'B2B, SaaS, Leadership',
+      experience_years: 7,
+      education: 'MBA',
+      resume_text: 'Experienced product leader',
+      stage: 'Offer'
+    },
+    {
+      name: 'Olivia Martinez',
+      email: 'olivia.m@example.com',
+      phone: '555-0204',
+      skills: 'Agile, Analytics, Strategy',
+      experience_years: 6,
+      education: 'BS Engineering',
+      resume_text: 'Technical PM',
+      stage: 'Hired'
+    }
+  ];
 
-console.log('Seed complete! Database is ready at data/ats.db');
+  for (const c of pmCandidates) {
+    const candidate = await createCandidate({
+      name: c.name,
+      email: c.email,
+      phone: c.phone,
+      skills: c.skills,
+      experience_years: c.experience_years,
+      education: c.education,
+      resume_text: c.resume_text
+    });
+
+    // Generate scores from 40 to 100 to test all 3 badge colors (Red, Blue, Green)
+    const score = Math.floor(Math.random() * 61) + 40;
+    let finalStage = c.stage;
+    if (score < 60 && finalStage !== 'Rejected') {
+      finalStage = 'Applied'; // Guardrail: poor fits cannot advance past Applied
+    }
+
+    await createApplication({
+      job_id: productJob.id,
+      candidate_id: candidate.id,
+      stage: finalStage,
+      ai_score: score
+    });
+  }
+
+  console.log('Seed complete! Database is ready at data/ats.db');
+}
+
+seed()
+  .catch(console.error)
+  .finally(async () => {
+    // Need to use prisma variable from db.js but it is not exported.
+    // Instead we can just exit the process cleanly.
+    process.exit(0);
+  });
