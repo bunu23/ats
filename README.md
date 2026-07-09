@@ -10,6 +10,16 @@ This Next-Gen ATS removes the manual overhead of moving candidates through a pip
 - **Autonomous Pipeline Progression:** Candidates are automatically moved to Screening or Phone Screen stages based on AI evaluation scores.
 - **Event-Driven Workflows:** Background tasks handle scheduling, "Empathy Delay" rejection emails, and SLA escalations.
 
+## 📚 Documentation
+
+Before diving into the codebase, we highly recommend reviewing the detailed documentation to understand the underlying architecture and capabilities:
+
+- [**Architecture & Design Patterns**](docs/ARCHITECTURE.md): Learn about our layered architecture, event-driven engine, and AI strategies.
+- [**Core Capabilities**](docs/CORE_CAPABILITIES.md): A deep dive into the automated workflows, AI evaluations, and dynamic SLA guardrails.
+- [**Demo Runbook**](docs/DEMO_RUNBOOK.md): Step-by-step instructions for testing automated features (like the Stale Sweeper) locally.
+- [**Wiki / Database Models**](docs/WIKI.md): Understand the core Prisma entities and how the `worker.ts` background processor operates.
+- [**Future Enhancements**](docs/FUTURE_ENHANCEMENTS.md): Our roadmap for taking this prototype to an enterprise-grade SaaS product.
+
 ## ⚡ Quick Start Guide
 
 ### Prerequisites
