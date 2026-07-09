@@ -4,9 +4,10 @@
 
 ## Architecture
 - Next.js 16 App Router (JavaScript)
-- Prisma ORM backed by SQLite (`prisma/dev.db`) for persistence
+- Prisma ORM backed by PostgreSQL and Docker (`docker-compose up -d`) for persistence
 - AI service layer with mock/real LLM support
-- Event-driven automation engine via Dependency Injection
+- Event-driven automation engine via Dependency Injection and BullMQ / Redis background worker
+- Playwright E2E Testing for UI interactions
 
 ## Pipeline Stages & Customization
 - **Industry-Agnostic Jobs**: Jobs are entirely customizable. Every single Job has its own `custom_stages` array defined upon creation instead of a hardcoded global pipeline.
