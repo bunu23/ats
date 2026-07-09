@@ -84,7 +84,6 @@ export default function Pipeline() {
       'Offer',
       'Background Check',
       'Hired',
-      'Onboarding',
       'Rejected'
     ];
     const stages = activeJob?.custom_stages?.length > 0 ? activeJob.custom_stages : DEFAULT_STAGES;
@@ -130,7 +129,6 @@ export default function Pipeline() {
     'Offer',
     'Background Check',
     'Hired',
-    'Onboarding',
     'Rejected'
   ];
   const STAGES =

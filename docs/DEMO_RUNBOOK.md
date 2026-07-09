@@ -14,7 +14,7 @@ You can run the system locally using Node.js or via Docker. To start the local N
 npm run dev
 ```
 
-Navigate to **`http://localhost:3000`** in your browser to enter the Recruiter Dashboard.
+Navigate to **`http://localhost:3001`** in your browser to enter the Recruiter Dashboard.
 
 ### 2. Enabling Real AI (Optional but Highly Recommended)
 

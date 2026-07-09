@@ -11,7 +11,6 @@ export const PIPELINE_STAGES = [
   'Offer',
   'Background Check',
   'Hired',
-  'Onboarding',
   'Rejected'
 ];
 
