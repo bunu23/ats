@@ -69,5 +69,4 @@ While robust for MVP and mid-market use cases, the current architecture has the 
 
 To elevate this project from a robust prototype to an enterprise-grade SaaS product, the following upgrades are recommended:
 
-1. **End-to-End (E2E) Testing:** Introduce Cypress or Playwright to automate browser interactions, specifically focusing on validating the React DnD (Drag-and-Drop) Kanban board logic.
-2. **WebSockets for Real-Time Updates:** Replace the current client-side fetching with WebSockets (via Socket.io or Pusher) so multiple recruiters viewing the Kanban board simultaneously see drag-and-drop changes in real-time.
+1. **WebSockets for Real-Time Updates:** Replace the current client-side fetching with WebSockets (via Socket.io or Pusher) so multiple recruiters viewing the Kanban board simultaneously see drag-and-drop changes in real-time.

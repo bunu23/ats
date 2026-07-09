@@ -94,6 +94,7 @@ This repository enforces strict quality and formatting standards via Husky pre-c
 
 - **Linting:** `npm run lint` (ESLint configuration in `eslint.config.mjs`)
 - **Formatting:** `npm run format` (Prettier configuration in `.prettierrc`)
-- **Testing:** `npm run test` (Jest test suite configured in `jest.config.mjs`, covering core Automation Engine logic in `__tests__/`)
+- **Unit Testing:** `npm run test` (Jest test suite configured in `jest.config.mjs`, covering core Automation Engine logic in `__tests__/`)
+- **E2E Testing:** `npm run test:e2e` (Playwright test suite validating frontend Kanban board drag-and-drop workflows)
 
 The `lint-staged` hook automatically runs `eslint --fix` and `prettier --write` against staged `.js`, `.jsx`, `.mjs`, `.json`, `.css`, and `.md` files before every commit.
