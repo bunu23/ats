@@ -1,9 +1,11 @@
 'use client';
 import { useState, useEffect } from 'react';
+import { usePathname } from 'next/navigation';
 
 export default function SlackToastProvider() {
   const [lastActivityId, setLastActivityId] = useState(null);
   const [toasts, setToasts] = useState([]);
+  const pathname = usePathname();
 
   useEffect(() => {
     const fetchLatest = async () => {
@@ -11,14 +13,20 @@ export default function SlackToastProvider() {
         const res = await fetch(`/api/activity?t=${Date.now()}`);
         const data = await res.json();
         if (data.success && data.data.length > 0) {
-          const notifyLogs = data.data.filter(
-            log =>
+          const notifyLogs = data.data.filter(log => {
+            const isPipelineToast =
+              log.type === 'stage_change' || log.type === 'interview_scheduled';
+            const isGlobalToast =
               log.type === 'slack_notification' ||
               log.type === 'email_sent' ||
-              log.type === 'notification' ||
-              log.type === 'stage_change' ||
-              log.type === 'interview_scheduled'
-          );
+              log.type === 'notification';
+
+            if (pathname === '/pipeline') {
+              return isPipelineToast;
+            } else {
+              return isGlobalToast;
+            }
+          });
 
           if (notifyLogs.length > 0) {
             let newLogs = [];
@@ -58,7 +66,7 @@ export default function SlackToastProvider() {
     fetchLatest();
     const interval = setInterval(fetchLatest, 3000);
     return () => clearInterval(interval);
-  }, [lastActivityId]);
+  }, [lastActivityId, pathname]);
 
   if (toasts.length === 0) return null;
 
