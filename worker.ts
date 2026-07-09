@@ -37,32 +37,34 @@ const redisConnection = new IORedis(process.env.REDIS_URL || 'redis://localhost:
   maxRetriesPerRequest: null
 });
 
-const queueWorker = new Worker('atsQueue', async (job) => {
-  const p = job.data;
-  console.log(`Processing ${job.name} for candidate ${p.candidateName}`);
+const queueWorker = new Worker(
+  'atsQueue',
+  async job => {
+    const p = job.data;
+    console.log(`Processing ${job.name} for candidate ${p.candidateName}`);
 
-  if (job.name === 'delayed_rejection') {
-    const apps = await getAllApplications();
-    const currentApp = apps.find(a => a.id === p.applicationId);
+    if (job.name === 'delayed_rejection') {
+      const apps = await getAllApplications();
+      const currentApp = apps.find(a => a.id === p.applicationId);
 
-    if (currentApp && currentApp.stage !== 'Rejected' && currentApp.stage !== 'Archived') {
-      await updateApplicationStage(
-        p.applicationId,
-        'Rejected',
-        'system',
-        'Delayed rejection executed (48h)'
-      );
-      await addActivityLog({
-        type: 'email_sent',
-        title: `Delayed Rejection Sent: ${p.candidateName}`,
-        description: `Dear ${p.candidateName}, thank you for your patience. After reviewing your application, we have decided to proceed with other candidates whose profiles more closely match our current needs for the ${p.jobTitle} position.`,
-        metadata: { to: p.email, automated: true },
-        application_id: p.applicationId,
-        job_id: p.job_id,
-        candidate_id: p.candidate_id
-      });
-    }
-  } else if (job.name === 'candidate_reminder_24h' || job.name === 'candidate_reminder_12h') {
+      if (currentApp && currentApp.stage !== 'Rejected' && currentApp.stage !== 'Archived') {
+        await updateApplicationStage(
+          p.applicationId,
+          'Rejected',
+          'system',
+          'Delayed rejection executed (48h)'
+        );
+        await addActivityLog({
+          type: 'email_sent',
+          title: `Delayed Rejection Sent: ${p.candidateName}`,
+          description: `Dear ${p.candidateName}, thank you for your patience. After reviewing your application, we have decided to proceed with other candidates whose profiles more closely match our current needs for the ${p.jobTitle} position.`,
+          metadata: { to: p.email, automated: true },
+          application_id: p.applicationId,
+          job_id: p.job_id,
+          candidate_id: p.candidate_id
+        });
+      }
+    } else if (job.name === 'candidate_reminder_24h' || job.name === 'candidate_reminder_12h') {
       await addActivityLog({
         type: 'email_sent',
         title: `Interview Reminder: ${p.candidateName}`,
@@ -72,7 +74,7 @@ const queueWorker = new Worker('atsQueue', async (job) => {
         job_id: p.job_id,
         candidate_id: p.candidate_id
       });
-  } else if (job.name === 'recruiter_reminder_24h') {
+    } else if (job.name === 'recruiter_reminder_24h') {
       await addActivityLog({
         type: 'notification',
         title: `Recruiter Reminder: Upcoming Interview`,
@@ -82,8 +84,10 @@ const queueWorker = new Worker('atsQueue', async (job) => {
         job_id: p.job_id,
         candidate_id: p.candidate_id
       });
-  }
-}, { connection: redisConnection as any });
+    }
+  },
+  { connection: redisConnection as any }
+);
 
 queueWorker.on('completed', job => console.log(`Job ${job.id} completed.`));
 queueWorker.on('failed', (job, err) => console.error(`Job ${job.id} failed:`, err));
@@ -99,9 +103,15 @@ setInterval(async () => {
 
   const slaEnabled = rules.find((r: any) => r.action_type === 'system_sla_escalation')?.enabled;
   const sweeperEnabled = rules.find((r: any) => r.action_type === 'system_stale_sweeper')?.enabled;
-  const offerRemindersEnabled = rules.find((r: any) => r.action_type === 'system_offer_reminders')?.enabled;
-  const interviewRemindersEnabled = rules.find((r: any) => r.action_type === 'system_interview_reminders')?.enabled;
-  const postInterviewThanksEnabled = rules.find((r: any) => r.action_type === 'system_post_interview_thanks')?.enabled;
+  const offerRemindersEnabled = rules.find(
+    (r: any) => r.action_type === 'system_offer_reminders'
+  )?.enabled;
+  const interviewRemindersEnabled = rules.find(
+    (r: any) => r.action_type === 'system_interview_reminders'
+  )?.enabled;
+  const postInterviewThanksEnabled = rules.find(
+    (r: any) => r.action_type === 'system_post_interview_thanks'
+  )?.enabled;
 
   const autoRejectApplied = settings.recruiter_settings?.autoRejectApplied || 14;
   const autoRejectScreening = settings.recruiter_settings?.autoRejectScreening || 5;
@@ -222,7 +232,11 @@ setInterval(async () => {
 
       // PHASE 3: The "Thank You for Your Time" Note (2 hours after interview)
       // Assuming interview lasts 1 hour, so 3 hours after start time we send a note.
-      else if (postInterviewThanksEnabled && hoursUntil < -3 && !app.post_interview_thank_you_sent) {
+      else if (
+        postInterviewThanksEnabled &&
+        hoursUntil < -3 &&
+        !app.post_interview_thank_you_sent
+      ) {
         await updateApplicationData(app.id, { post_interview_thank_you_sent: true });
         // Instead of queueing, we can just execute it immediately since we are in the worker loop and the time has passed.
         await addActivityLog({

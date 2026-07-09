@@ -335,26 +335,30 @@ export async function processNewApplication(db, applicationId) {
       if (delayedRejectionEnabled) {
         const executeAt = new Date(Date.now() + 48 * 60 * 60 * 1000).toISOString(); // 48 hours later
 
-      const delayMs = new Date(executeAt).getTime() - Date.now();
-      await atsQueue.add('delayed_rejection', {
-        applicationId: applicationId,
-        candidateName: application.candidate_name,
-        jobTitle: application.job_title,
-        email: application.candidate_email,
-        job_id: application.job_id,
-        candidate_id: application.candidate_id
-      }, { delay: delayMs });
+        const delayMs = new Date(executeAt).getTime() - Date.now();
+        await atsQueue.add(
+          'delayed_rejection',
+          {
+            applicationId: applicationId,
+            candidateName: application.candidate_name,
+            jobTitle: application.job_title,
+            email: application.candidate_email,
+            job_id: application.job_id,
+            candidate_id: application.candidate_id
+          },
+          { delay: delayMs }
+        );
 
-      await db.addActivityLog({
-        type: 'delayed_rejection',
-        title: `Delayed Rejection Queued: ${application.candidate_name}`,
-        description: `Candidate scored low (${score.overallScore}/100). To maintain human empathy, their rejection email has been queued to send in 48 hours instead of instantly.`,
-        metadata: { automated: true, execute_at: executeAt },
-        application_id: applicationId,
-        job_id: application.job_id,
-        candidate_id: application.candidate_id
-      });
-      results.push({ action: 'delayed_rejection_queued' });
+        await db.addActivityLog({
+          type: 'delayed_rejection',
+          title: `Delayed Rejection Queued: ${application.candidate_name}`,
+          description: `Candidate scored low (${score.overallScore}/100). To maintain human empathy, their rejection email has been queued to send in 48 hours instead of instantly.`,
+          metadata: { automated: true, execute_at: executeAt },
+          application_id: applicationId,
+          job_id: application.job_id,
+          candidate_id: application.candidate_id
+        });
+        results.push({ action: 'delayed_rejection_queued' });
       }
     }
   } catch (error) {
@@ -395,44 +399,56 @@ export async function scheduleInterviewReminders(db, application, interviewDateS
   const cand24h = new Date(interviewDate.getTime() - 24 * 60 * 60 * 1000);
   if (cand24h > now) {
     const delayMs = cand24h.getTime() - now.getTime();
-    await atsQueue.add('candidate_reminder_24h', {
-      applicationId: application.id,
-      candidateName: application.candidate_name,
-      jobTitle: application.job_title,
-      email: application.candidate_email,
-      job_id: application.job_id,
-      candidate_id: application.candidate_id,
-      interviewTime: interviewDate.toLocaleString()
-    }, { delay: delayMs });
+    await atsQueue.add(
+      'candidate_reminder_24h',
+      {
+        applicationId: application.id,
+        candidateName: application.candidate_name,
+        jobTitle: application.job_title,
+        email: application.candidate_email,
+        job_id: application.job_id,
+        candidate_id: application.candidate_id,
+        interviewTime: interviewDate.toLocaleString()
+      },
+      { delay: delayMs }
+    );
   }
 
   // Schedule Candidate 12h Reminder
   const cand12h = new Date(interviewDate.getTime() - 12 * 60 * 60 * 1000);
   if (cand12h > now) {
     const delayMs = cand12h.getTime() - now.getTime();
-    await atsQueue.add('candidate_reminder_12h', {
-      applicationId: application.id,
-      candidateName: application.candidate_name,
-      jobTitle: application.job_title,
-      email: application.candidate_email,
-      job_id: application.job_id,
-      candidate_id: application.candidate_id,
-      interviewTime: interviewDate.toLocaleString()
-    }, { delay: delayMs });
+    await atsQueue.add(
+      'candidate_reminder_12h',
+      {
+        applicationId: application.id,
+        candidateName: application.candidate_name,
+        jobTitle: application.job_title,
+        email: application.candidate_email,
+        job_id: application.job_id,
+        candidate_id: application.candidate_id,
+        interviewTime: interviewDate.toLocaleString()
+      },
+      { delay: delayMs }
+    );
   }
 
   // Schedule Recruiter 24h Reminder
   const rec24h = new Date(interviewDate.getTime() - 24 * 60 * 60 * 1000);
   if (rec24h > now) {
     const delayMs = rec24h.getTime() - now.getTime();
-    await atsQueue.add('recruiter_reminder_24h', {
-      applicationId: application.id,
-      candidateName: application.candidate_name,
-      jobTitle: application.job_title,
-      email: application.candidate_email,
-      job_id: application.job_id,
-      candidate_id: application.candidate_id,
-      interviewTime: interviewDate.toLocaleString()
-    }, { delay: delayMs });
+    await atsQueue.add(
+      'recruiter_reminder_24h',
+      {
+        applicationId: application.id,
+        candidateName: application.candidate_name,
+        jobTitle: application.job_title,
+        email: application.candidate_email,
+        job_id: application.job_id,
+        candidate_id: application.candidate_id,
+        interviewTime: interviewDate.toLocaleString()
+      },
+      { delay: delayMs }
+    );
   }
 }

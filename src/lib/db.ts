@@ -398,5 +398,3 @@ export async function updateSettings(fields) {
   });
   return await getSettings();
 }
-
-
