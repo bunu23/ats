@@ -1,22 +1,24 @@
 'use client';
-import { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useRouter } from 'next/navigation';
-import CandidateTable from './components/CandidateTable';
-import CandidateModal from './components/CandidateModal';
+import CandidateTable, { Candidate, AppInfo } from './components/CandidateTable';
+import CandidateModal, { ExtendedCandidate, Review } from './components/CandidateModal';
+import { Job } from '../jobs/page';
+import { PipelineApplication } from '../pipeline/components/KanbanCard';
 
 export default function Candidates() {
   const router = useRouter();
-  const [candidates, setCandidates] = useState([]);
-  const [applications, setApplications] = useState([]);
-  const [jobs, setJobs] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [searchQuery, setSearchQuery] = useState('');
-  const [showForm, setShowForm] = useState(false);
-  const [isParsing, setIsParsing] = useState(false);
-  const fileInputRef = useRef(null);
-  const [selectedCandidate, setSelectedCandidate] = useState(null);
-  const [reviews, setReviews] = useState([]);
-  const [newReview, setNewReview] = useState('');
+  const [candidates, setCandidates] = useState<Candidate[]>([]);
+  const [applications, setApplications] = useState<PipelineApplication[]>([]);
+  const [jobs, setJobs] = useState<Job[]>([]);
+  const [loading, setLoading] = useState<boolean>(true);
+  const [searchQuery, setSearchQuery] = useState<string>('');
+  const [showForm, setShowForm] = useState<boolean>(false);
+  const [isParsing, setIsParsing] = useState<boolean>(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const [selectedCandidate, setSelectedCandidate] = useState<ExtendedCandidate | null>(null);
+  const [reviews, setReviews] = useState<Review[]>([]);
+  const [newReview, setNewReview] = useState<string>('');
   const [formData, setFormData] = useState({
     name: '',
     email: '',
@@ -53,7 +55,7 @@ export default function Candidates() {
     return () => clearInterval(interval);
   }, []);
 
-  const handleSearch = e => {
+  const handleSearch = (e: React.ChangeEvent<HTMLInputElement>) => {
     setSearchQuery(e.target.value);
   };
 
@@ -66,7 +68,7 @@ export default function Candidates() {
     );
   });
 
-  const handleAddCandidate = async e => {
+  const handleAddCandidate = async (e: React.FormEvent) => {
     e.preventDefault();
 
     const payload = {
@@ -102,7 +104,7 @@ export default function Candidates() {
     fetchData();
   };
 
-  const handleDeleteCandidate = async (id, e) => {
+  const handleDeleteCandidate = async (id: string, e: React.MouseEvent) => {
     e.stopPropagation();
     if (
       confirm(
@@ -114,8 +116,8 @@ export default function Candidates() {
     }
   };
 
-  const handleFileUpload = async e => {
-    const file = e.target.files[0];
+  const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
     if (!file) return;
 
     setIsParsing(true);
@@ -145,7 +147,7 @@ export default function Candidates() {
     }
   };
 
-  const getCandidateAppInfo = candidateId => {
+  const getCandidateAppInfo = (candidateId: string): AppInfo => {
     const apps = applications
       .filter(a => a.candidate_id === candidateId)
       .sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
@@ -205,7 +207,7 @@ export default function Candidates() {
     };
   };
 
-  const navigateToPipeline = jobId => {
+  const navigateToPipeline = (jobId: string | null) => {
     if (jobId) {
       router.push(`/pipeline?jobId=${jobId}`);
     }
@@ -220,7 +222,7 @@ export default function Candidates() {
     setNewReview('');
   };
 
-  const openModal = candidate => {
+  const openModal = (candidate: Candidate) => {
     const appInfo = getCandidateAppInfo(candidate.id);
     setSelectedCandidate({ ...candidate, appInfo });
     setReviews([

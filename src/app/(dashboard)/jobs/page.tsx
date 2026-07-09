@@ -1,12 +1,26 @@
 'use client';
-import { useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
+
+export interface Job {
+  id: string;
+  title: string;
+  department: string;
+  location: string;
+  type: string;
+  description: string;
+  requirements: string;
+  salary_range: string;
+  status: string;
+  closed_at?: string | null;
+  custom_stages: string[];
+}
 
 export default function Jobs() {
-  const [jobs, setJobs] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [showForm, setShowForm] = useState(false);
-  const [selectedJob, setSelectedJob] = useState(null);
-  const [statusFilter, setStatusFilter] = useState('All');
+  const [jobs, setJobs] = useState<Job[]>([]);
+  const [loading, setLoading] = useState<boolean>(true);
+  const [showForm, setShowForm] = useState<boolean>(false);
+  const [selectedJob, setSelectedJob] = useState<Job | null>(null);
+  const [statusFilter, setStatusFilter] = useState<string>('All');
   const [formData, setFormData] = useState({
     title: '',
     department: '',
@@ -37,7 +51,7 @@ export default function Jobs() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  const handleCreateJob = async e => {
+  const handleCreateJob = async (e: React.FormEvent) => {
     e.preventDefault();
     await fetch('/api/jobs', {
       method: 'POST',

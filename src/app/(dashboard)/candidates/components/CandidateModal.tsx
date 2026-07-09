@@ -1,4 +1,24 @@
 import React from 'react';
+import { Candidate, AppInfo } from './CandidateTable';
+
+export interface ExtendedCandidate extends Candidate {
+  appInfo: AppInfo;
+}
+
+export interface Review {
+  text: string;
+  author: string;
+  date: string;
+}
+
+interface CandidateModalProps {
+  selectedCandidate: ExtendedCandidate;
+  setSelectedCandidate: (candidate: ExtendedCandidate | null) => void;
+  reviews: Review[];
+  newReview: string;
+  setNewReview: (text: string) => void;
+  handleAddReview: () => void;
+}
 
 export default function CandidateModal({
   selectedCandidate,
@@ -7,7 +27,7 @@ export default function CandidateModal({
   newReview,
   setNewReview,
   handleAddReview
-}) {
+}: CandidateModalProps) {
   return (
     <div
       style={{

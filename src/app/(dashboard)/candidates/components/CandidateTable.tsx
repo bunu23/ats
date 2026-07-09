@@ -1,12 +1,41 @@
 import React from 'react';
 
+export interface Candidate {
+  id: string;
+  name: string;
+  email: string;
+  phone?: string;
+  experience_years: number;
+  education?: string;
+  skills?: string;
+  resume_text?: string;
+}
+
+export interface AppInfo {
+  stage: string;
+  color: string;
+  bg: string;
+  role: string;
+  job_id: string | null;
+  score: number | null;
+  source: string;
+}
+
+interface CandidateTableProps {
+  filteredCandidates: Candidate[];
+  getCandidateAppInfo: (id: string) => AppInfo;
+  openModal: (candidate: Candidate) => void;
+  navigateToPipeline?: (jobId: string | null) => void;
+  handleDeleteCandidate: (id: string, e: React.MouseEvent) => void;
+}
+
 export default function CandidateTable({
   filteredCandidates,
   getCandidateAppInfo,
   openModal,
   navigateToPipeline,
   handleDeleteCandidate
-}) {
+}: CandidateTableProps) {
   return (
     <div
       style={{
