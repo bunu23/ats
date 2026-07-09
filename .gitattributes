@@ -1,0 +1,5 @@
+# Enforce GitHub to ignore generated HTML reports for language statistics
+playwright-report/** linguist-generated=true
+test-results/** linguist-generated=true
+.next/** linguist-generated=true
+public/** linguist-vendored=true
