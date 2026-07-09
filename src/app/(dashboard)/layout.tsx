@@ -1,7 +1,9 @@
 import Link from 'next/link';
 import SlackToastProvider from '../../components/SlackToastProvider';
 
-export default function DashboardLayout({ children }) {
+import React from 'react';
+
+export default function DashboardLayout({ children }: { children: React.ReactNode }) {
   return (
     <div className="app-container">
       <aside className="sidebar">

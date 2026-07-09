@@ -2,9 +2,11 @@
 import { useState, useEffect } from 'react';
 import { usePathname } from 'next/navigation';
 
+import { ActivityLog } from '@prisma/client';
+
 export default function SlackToastProvider() {
-  const [lastActivityId, setLastActivityId] = useState(null);
-  const [toasts, setToasts] = useState([]);
+  const [lastActivityId, setLastActivityId] = useState<number | null>(null);
+  const [toasts, setToasts] = useState<ActivityLog[]>([]);
   const pathname = usePathname();
 
   useEffect(() => {
