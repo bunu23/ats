@@ -1,4 +1,7 @@
-FROM node:18-alpine AS builder
+FROM node:20-alpine AS builder
+
+# Install openssl for Prisma compatibility
+RUN apk add --no-cache openssl
 
 # Set working directory
 WORKDIR /app
@@ -10,6 +13,9 @@ RUN npm ci
 # Copy application source code
 COPY . .
 
+# Generate Prisma Client
+RUN npx prisma generate
+
 # Disable telemetry during the build
 ENV NEXT_TELEMETRY_DISABLED=1
 
@@ -17,7 +23,11 @@ ENV NEXT_TELEMETRY_DISABLED=1
 RUN npm run build
 
 # Production image, copy all the files and run next
-FROM node:18-alpine AS runner
+FROM node:20-alpine AS runner
+
+# Install openssl for Prisma compatibility
+RUN apk add --no-cache openssl
+
 WORKDIR /app
 
 ENV NODE_ENV=production
@@ -32,7 +42,7 @@ COPY --from=builder --chown=node:node /app/node_modules ./node_modules
 COPY --from=builder --chown=node:node /app/public ./public
 COPY --from=builder --chown=node:node /app/.next ./.next
 COPY --from=builder --chown=node:node /app/src ./src
-COPY --from=builder --chown=node:node /app/worker.js ./worker.js
+COPY --from=builder --chown=node:node /app/worker.ts ./worker.ts
 
 # Switch to non-root user
 USER node
