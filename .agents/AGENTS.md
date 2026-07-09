@@ -21,3 +21,9 @@
 
 ## Next.js Framework Rules
 This version has breaking changes — APIs, conventions, and file structure may all differ from your training data. Read the relevant guide in `node_modules/next/dist/docs/` before writing any code. Heed deprecation notices.
+
+## Engineering & Commit Strategy
+- **Refactors and Migrations**: To make code review easier, structure commits strictly in stages:
+  1. **File Renames**: Only commit file extension or path changes (e.g., `.js` to `.tsx`) with no inner file modifications.
+  2. **Type Additions**: Commit the injection of TypeScript interfaces and types.
+  3. **Minor Refactors**: Commit any logic tweaks or bug fixes separately.
