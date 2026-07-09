@@ -82,8 +82,6 @@ This section walks you through the complete lifecycle of a candidate—from the 
 
 ## 🔎 Part 3: Stakeholder Review & Audit Trails
 
-To prove that the AI isn't operating in a "black box," you can show stakeholders exactly how to review the system's decisions.
-
 ### 1. 🎛️ Mission Control (Activity & Emails)
 
 - **Action:** Click the **"Activity & Emails"** tab in the sidebar.
