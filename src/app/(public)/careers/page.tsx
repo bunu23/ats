@@ -240,8 +240,8 @@ export default function Careers() {
                     boxShadow: '0 4px 14px 0 rgba(59, 130, 246, 0.39)',
                     transition: 'opacity 0.2s'
                   }}
-                  onMouseOver={e => (e.currentTarget.style.opacity = 0.9)}
-                  onMouseOut={e => (e.currentTarget.style.opacity = 1)}
+                  onMouseOver={e => (e.currentTarget.style.opacity = '0.9')}
+                  onMouseOut={e => (e.currentTarget.style.opacity = '1')}
                 >
                   Apply Now
                 </button>

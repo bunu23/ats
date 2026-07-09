@@ -1,9 +1,16 @@
 'use client';
-import { useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
+import { ActivityLog } from '@prisma/client';
 
-const ActivityItem = ({ log, expandedId, setExpandedId }) => {
+interface ActivityItemProps {
+  log: ActivityLog;
+  expandedId: string | null;
+  setExpandedId: (id: string | null) => void;
+}
+
+const ActivityItem: React.FC<ActivityItemProps> = ({ log, expandedId, setExpandedId }) => {
   const isExpanded = expandedId === log.id;
-  let meta = {};
+  let meta: Record<string, any> = {};
   try {
     meta = JSON.parse(log.metadata || '{}');
   } catch (e) {}
@@ -220,8 +227,16 @@ const ActivityItem = ({ log, expandedId, setExpandedId }) => {
   );
 };
 
-const Accordion = ({ title, items, expandedId, setExpandedId, defaultOpen = false }) => {
-  const [isOpen, setIsOpen] = useState(defaultOpen);
+interface AccordionProps {
+  title: string;
+  items: ActivityLog[];
+  expandedId: string | null;
+  setExpandedId: (id: string | null) => void;
+  defaultOpen?: boolean;
+}
+
+const Accordion: React.FC<AccordionProps> = ({ title, items, expandedId, setExpandedId, defaultOpen = false }) => {
+  const [isOpen, setIsOpen] = useState<boolean>(defaultOpen);
 
   return (
     <div className="glass-card" style={{ padding: 0, overflow: 'hidden' }}>
@@ -285,9 +300,9 @@ const Accordion = ({ title, items, expandedId, setExpandedId, defaultOpen = fals
 };
 
 export default function Activity() {
-  const [logs, setLogs] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [expandedId, setExpandedId] = useState(null);
+  const [logs, setLogs] = useState<ActivityLog[]>([]);
+  const [loading, setLoading] = useState<boolean>(true);
+  const [expandedId, setExpandedId] = useState<string | null>(null);
 
   useEffect(() => {
     fetch('/api/activity')

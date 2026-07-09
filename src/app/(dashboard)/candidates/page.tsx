@@ -73,7 +73,7 @@ export default function Candidates() {
 
     const payload = {
       ...formData,
-      experience_years: parseInt(formData.experience_years) || 0
+      experience_years: parseInt(String(formData.experience_years)) || 0
     };
 
     if (formData.job_id) {
@@ -134,7 +134,7 @@ export default function Candidates() {
         setFormData(prev => ({
           ...prev,
           ...data.data,
-          experience_years: parseInt(data.data.experience_years) || 0
+          experience_years: parseInt(String(data.data.experience_years)) || 0
         }));
       } else {
         alert('Error parsing resume: ' + data.error);
@@ -150,13 +150,14 @@ export default function Candidates() {
   const getCandidateAppInfo = (candidateId: string): AppInfo => {
     const apps = applications
       .filter(a => a.candidate_id === candidateId)
-      .sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
+      .sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
     if (apps.length === 0) {
       return {
         stage: 'NEW',
         color: '#94a3b8',
         bg: 'rgba(148, 163, 184, 0.1)',
         role: 'No active role',
+        job_id: null,
         score: null,
         source: 'Direct'
       };
@@ -382,7 +383,7 @@ export default function Candidates() {
                 type="number"
                 min="0"
                 value={formData.experience_years}
-                onChange={e => setFormData({ ...formData, experience_years: e.target.value })}
+                onChange={e => setFormData({ ...formData, experience_years: parseInt(e.target.value) || 0 })}
                 required
                 style={{
                   padding: '0.75rem',

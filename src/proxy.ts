@@ -1,6 +1,6 @@
-import { NextResponse } from 'next/server';
+import { NextResponse, NextRequest } from 'next/server';
 
-export function middleware(request) {
+export function proxy(request: NextRequest) {
   const session = request.cookies.get('ats_session')?.value;
 
   // The paths we want to protect

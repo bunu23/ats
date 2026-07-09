@@ -6,8 +6,12 @@ export interface PipelineApplication {
   ai_score?: number | null;
   priority?: string | null;
   candidate_name: string;
+  candidate_id: string;
   stage_entered_at: string;
+  created_at: string;
   interview_date?: string | null;
+  resume_score?: number | null;
+  source?: string | null;
   job_id: string;
 }
 
