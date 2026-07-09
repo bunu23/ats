@@ -11,7 +11,7 @@ jest.mock('../src/lib/ai-service', () => ({
 
 // Mock the queue
 jest.mock('../src/lib/queue', () => ({
-  atsQueue: { add: jest.fn() }
+  atsQueue: { add: jest.fn(), getJobs: jest.fn().mockResolvedValue([]) }
 }));
 
 import { scoreCandidate } from '../src/lib/ai-service';
