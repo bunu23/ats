@@ -81,6 +81,7 @@ export default function DashboardLayout({ children }) {
           Copyright &copy; 2026 Bunu Bhattarai. All rights reserved.
         </footer>
       </main>
+      <SlackToastProvider />
     </div>
   );
 }

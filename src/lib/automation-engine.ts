@@ -451,4 +451,14 @@ export async function scheduleInterviewReminders(db, application, interviewDateS
       { delay: delayMs }
     );
   }
+
+  // Log the interview scheduling event
+  await db.addActivityLog({
+    type: 'interview_scheduled',
+    title: `Interview Scheduled: ${application.candidate_name}`,
+    description: `An interview was scheduled for ${application.candidate_name} at ${interviewDate.toLocaleString()}`,
+    application_id: application.id,
+    job_id: application.job_id,
+    candidate_id: application.candidate_id
+  });
 }

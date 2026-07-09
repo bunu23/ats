@@ -15,7 +15,9 @@ export default function SlackToastProvider() {
             log =>
               log.type === 'slack_notification' ||
               log.type === 'email_sent' ||
-              log.type === 'notification'
+              log.type === 'notification' ||
+              log.type === 'stage_change' ||
+              log.type === 'interview_scheduled'
           );
 
           if (notifyLogs.length > 0) {
@@ -77,7 +79,16 @@ export default function SlackToastProvider() {
         const isSlack = toast.type === 'slack_notification';
         const isEmail = toast.type === 'email_sent';
         const isAlert = toast.type === 'notification';
-        const bgColor = isSlack ? '#4a154b' : isEmail ? '#0284c7' : isAlert ? '#ef4444' : '#0ea5e9';
+        const isStageChange = toast.type === 'stage_change';
+        const isInterview = toast.type === 'interview_scheduled';
+
+        let bgColor = '#0ea5e9'; // default blue
+        if (isSlack) bgColor = '#4a154b';
+        else if (isEmail) bgColor = '#0284c7';
+        else if (isAlert) bgColor = '#ef4444';
+        else if (isStageChange)
+          bgColor = '#8b5cf6'; // purple
+        else if (isInterview) bgColor = '#10b981'; // emerald
 
         const icon = isSlack ? (
           <img
@@ -94,8 +105,12 @@ export default function SlackToastProvider() {
           <span style={{ fontSize: '1.2rem', marginRight: '8px' }}>✉️</span>
         ) : isAlert ? (
           <span style={{ fontSize: '1.2rem', marginRight: '8px' }}>🚨</span>
-        ) : (
+        ) : isStageChange ? (
           <span style={{ fontSize: '1.2rem', marginRight: '8px' }}>🔄</span>
+        ) : isInterview ? (
+          <span style={{ fontSize: '1.2rem', marginRight: '8px' }}>📅</span>
+        ) : (
+          <span style={{ fontSize: '1.2rem', marginRight: '8px' }}>🚀</span>
         );
 
         return (
