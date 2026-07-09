@@ -1,4 +1,15 @@
-import KanbanCard from './KanbanCard';
+import React from 'react';
+import KanbanCard, { PipelineApplication } from './KanbanCard';
+
+interface KanbanColumnProps {
+  stage: string;
+  applications: PipelineApplication[];
+  handleDragOver: (e: React.DragEvent<HTMLDivElement>) => void;
+  handleDrop: (e: React.DragEvent<HTMLDivElement>, stage: string) => void;
+  handleDragStart: (e: React.DragEvent<HTMLDivElement>, id: string) => void;
+  updateInterviewDate: (id: string, dateStr: string) => void;
+  moveApplication: (id: string, stage: string) => void;
+}
 
 export default function KanbanColumn({
   stage,
@@ -8,7 +19,7 @@ export default function KanbanColumn({
   handleDragStart,
   updateInterviewDate,
   moveApplication
-}) {
+}: KanbanColumnProps) {
   const stageApps = applications.filter(a => a.stage === stage);
 
   return (

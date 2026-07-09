@@ -1,12 +1,20 @@
 'use client';
-import { useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import KanbanBoard from './components/KanbanBoard';
+import { PipelineApplication } from './components/KanbanCard';
+
+interface Job {
+  id: string;
+  title: string;
+  status: string;
+  custom_stages: string[];
+}
 
 export default function Pipeline() {
-  const [jobs, setJobs] = useState([]);
-  const [selectedJobId, setSelectedJobId] = useState('all');
-  const [applications, setApplications] = useState([]);
-  const [loading, setLoading] = useState(true);
+  const [jobs, setJobs] = useState<Job[]>([]);
+  const [selectedJobId, setSelectedJobId] = useState<string>('all');
+  const [applications, setApplications] = useState<PipelineApplication[]>([]);
+  const [loading, setLoading] = useState<boolean>(true);
 
   useEffect(() => {
     fetch('/api/jobs')
@@ -42,7 +50,7 @@ export default function Pipeline() {
     return () => clearInterval(interval);
   }, [selectedJobId]);
 
-  const moveApplication = async (id, newStage) => {
+  const moveApplication = async (id: string, newStage: string) => {
     // Optimistic UI update
     setApplications(prev => prev.map(app => (app.id === id ? { ...app, stage: newStage } : app)));
 
@@ -54,15 +62,15 @@ export default function Pipeline() {
     });
   };
 
-  const handleDragStart = (e, id) => {
+  const handleDragStart = (e: React.DragEvent<HTMLDivElement>, id: string) => {
     e.dataTransfer.setData('appId', id);
   };
 
-  const handleDragOver = e => {
+  const handleDragOver = (e: React.DragEvent<HTMLDivElement>) => {
     e.preventDefault();
   };
 
-  const handleDrop = (e, targetStage) => {
+  const handleDrop = (e: React.DragEvent<HTMLDivElement>, targetStage: string) => {
     const id = e.dataTransfer.getData('appId');
     const app = applications.find(a => a.id === id);
     if (!app || app.stage === targetStage) return;
@@ -99,7 +107,7 @@ export default function Pipeline() {
     moveApplication(id, targetStage);
   };
 
-  const updateInterviewDate = async (id, dateStr) => {
+  const updateInterviewDate = async (id: string, dateStr: string) => {
     // Optimistic UI update
     setApplications(prev =>
       prev.map(app => (app.id === id ? { ...app, interview_date: dateStr } : app))

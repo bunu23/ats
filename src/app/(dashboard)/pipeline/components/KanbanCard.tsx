@@ -1,10 +1,31 @@
+import React from 'react';
+
+export interface PipelineApplication {
+  id: string;
+  stage: string;
+  ai_score?: number | null;
+  priority?: string | null;
+  candidate_name: string;
+  stage_entered_at: string;
+  interview_date?: string | null;
+  job_id: string;
+}
+
+interface KanbanCardProps {
+  app: PipelineApplication;
+  stage: string;
+  handleDragStart: (e: React.DragEvent<HTMLDivElement>, id: string) => void;
+  updateInterviewDate: (id: string, dateStr: string) => void;
+  moveApplication: (id: string, stage: string) => void;
+}
+
 export default function KanbanCard({
   app,
   stage,
   handleDragStart,
   updateInterviewDate,
   moveApplication
-}) {
+}: KanbanCardProps) {
   const isBelowThreshold = app.ai_score !== undefined && app.ai_score !== null && app.ai_score < 60;
 
   return (
