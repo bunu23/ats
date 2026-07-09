@@ -3,7 +3,7 @@
 *Note: Specific domain rules (UI, Backend, and Automation) have been separated into "Skills" located in the `.agents/skills/` directory. The agent will automatically read those files when relevant.*
 
 ## Architecture
-- Next.js 16 App Router (JavaScript)
+- Next.js 16 App Router (TypeScript)
 - Prisma ORM backed by PostgreSQL and Docker (`docker-compose up -d`) for persistence
 - AI service layer with mock/real LLM support
 - Event-driven automation engine via Dependency Injection and BullMQ / Redis background worker

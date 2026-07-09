@@ -28,7 +28,7 @@ When a candidate transitions to a new pipeline stage, this skill:
 
 ## Integration
 
-The follow-up engine is triggered by the automation engine (`src/lib/automation-engine.js`) whenever an application's stage changes. Emails are logged in the `activity_log` table and visible in the Activity page.
+The follow-up engine is triggered by the automation engine (`src/lib/automation-engine.ts`) whenever an application's stage changes. Emails are logged in the `activity_log` table and visible in the Activity page.
 
 ## Customization
 
