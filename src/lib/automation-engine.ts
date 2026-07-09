@@ -331,7 +331,9 @@ export async function processNewApplication(db, applicationId) {
     }
     // PHASE 1: Delayed Rejection (The 5-Minute Rejection guard)
     else if (score.overallScore <= 59) {
-      const executeAt = new Date(Date.now() + 48 * 60 * 60 * 1000).toISOString(); // 48 hours later
+      const delayedRejectionEnabled = await db.isAutomationRuleEnabled('system_delayed_rejection');
+      if (delayedRejectionEnabled) {
+        const executeAt = new Date(Date.now() + 48 * 60 * 60 * 1000).toISOString(); // 48 hours later
 
       const delayMs = new Date(executeAt).getTime() - Date.now();
       await atsQueue.add('delayed_rejection', {
@@ -353,6 +355,7 @@ export async function processNewApplication(db, applicationId) {
         candidate_id: application.candidate_id
       });
       results.push({ action: 'delayed_rejection_queued' });
+      }
     }
   } catch (error) {
     console.error('Auto-scoring failed:', error);
@@ -377,6 +380,9 @@ export async function scheduleInterviewReminders(db, application, interviewDateS
   await removeDelayedBullMQ(application.id, 'candidate_reminder_24h');
   await removeDelayedBullMQ(application.id, 'candidate_reminder_12h');
   await removeDelayedBullMQ(application.id, 'recruiter_reminder_24h');
+
+  const remindersEnabled = await db.isAutomationRuleEnabled('system_interview_reminders');
+  if (!remindersEnabled) return;
 
   if (!interviewDateStr) return;
 

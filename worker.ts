@@ -6,7 +6,8 @@ import {
   updateApplicationData,
   updateApplicationStage,
   addActivityLog,
-  getSettings
+  getSettings,
+  getAutomationRules
 } from './src/lib/db.js';
 
 console.log('Background worker started. Monitoring SLAs, delayed tasks, and time-based rules...');
@@ -94,6 +95,13 @@ setInterval(async () => {
   // 2. Process SLAs and Time-Based Application Rules
   const applications = await getAllApplications();
   const settings = await getSettings();
+  const rules = await getAutomationRules();
+
+  const slaEnabled = rules.find((r: any) => r.action_type === 'system_sla_escalation')?.enabled;
+  const sweeperEnabled = rules.find((r: any) => r.action_type === 'system_stale_sweeper')?.enabled;
+  const offerRemindersEnabled = rules.find((r: any) => r.action_type === 'system_offer_reminders')?.enabled;
+  const interviewRemindersEnabled = rules.find((r: any) => r.action_type === 'system_interview_reminders')?.enabled;
+  const postInterviewThanksEnabled = rules.find((r: any) => r.action_type === 'system_post_interview_thanks')?.enabled;
 
   const autoRejectApplied = settings.recruiter_settings?.autoRejectApplied || 14;
   const autoRejectScreening = settings.recruiter_settings?.autoRejectScreening || 5;
@@ -112,7 +120,7 @@ setInterval(async () => {
 
     // Check SLA
     const slaLimit = job.slas?.[app.stage];
-    if (slaLimit && daysInStage > slaLimit) {
+    if (slaEnabled && slaLimit && daysInStage > slaLimit) {
       // SLA Breach Logic
       if (daysInStage > slaLimit + 2) {
         if (app.priority !== 'Urgent') {
@@ -152,7 +160,7 @@ setInterval(async () => {
     }
 
     // 1. Auto-Reject Applied
-    if (app.stage === 'Applied' && daysInStage > autoRejectApplied) {
+    if (sweeperEnabled && app.stage === 'Applied' && daysInStage > autoRejectApplied) {
       await sendCourteousRejection(
         app,
         `Stagnated in Applied stage for > ${autoRejectApplied} days.`
@@ -160,7 +168,7 @@ setInterval(async () => {
     }
 
     // 2. Auto-Reject Screening
-    if (app.stage === 'Screening' && daysInStage > autoRejectScreening) {
+    if (sweeperEnabled && app.stage === 'Screening' && daysInStage > autoRejectScreening) {
       await sendCourteousRejection(
         app,
         `Stagnated in Screening stage for > ${autoRejectScreening} days.`
@@ -168,7 +176,7 @@ setInterval(async () => {
     }
 
     // 3. Auto-Reject Interview (The "Stale Sweeper")
-    if (app.stage === 'Interview' && daysInStage > autoRejectInterview) {
+    if (sweeperEnabled && app.stage === 'Interview' && daysInStage > autoRejectInterview) {
       await sendCourteousRejection(
         app,
         `Stagnated in Interview loop for > ${autoRejectInterview} days without an update.`
@@ -176,7 +184,7 @@ setInterval(async () => {
     }
 
     // Phase 5: Offer Expiration Reminder (Gentle nudge 48 hours before expiration)
-    if (app.stage === 'Offer' && !app.offer_reminder_sent) {
+    if (offerRemindersEnabled && app.stage === 'Offer' && !app.offer_reminder_sent) {
       const offerSla = slaLimit || 5; // Default 5 days expiration
       if (daysInStage >= offerSla - 2 && daysInStage > 0) {
         await updateApplicationData(app.id, { offer_reminder_sent: true });
@@ -199,7 +207,7 @@ setInterval(async () => {
       const hoursUntil = (interviewDate.getTime() - now.getTime()) / (1000 * 60 * 60);
 
       // 1-Hour Reminder
-      if (hoursUntil > 0 && hoursUntil <= 1 && !app.reminded_1h) {
+      if (interviewRemindersEnabled && hoursUntil > 0 && hoursUntil <= 1 && !app.reminded_1h) {
         await updateApplicationData(app.id, { reminded_1h: true });
         await addActivityLog({
           type: 'email_sent',
@@ -214,7 +222,7 @@ setInterval(async () => {
 
       // PHASE 3: The "Thank You for Your Time" Note (2 hours after interview)
       // Assuming interview lasts 1 hour, so 3 hours after start time we send a note.
-      else if (hoursUntil < -3 && !app.post_interview_thank_you_sent) {
+      else if (postInterviewThanksEnabled && hoursUntil < -3 && !app.post_interview_thank_you_sent) {
         await updateApplicationData(app.id, { post_interview_thank_you_sent: true });
         // Instead of queueing, we can just execute it immediately since we are in the worker loop and the time has passed.
         await addActivityLog({

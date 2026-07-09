@@ -66,6 +66,7 @@ describe('Automation Engine', () => {
           enabled: true
         }
       ]),
+      isAutomationRuleEnabled: jest.fn().mockResolvedValue(true),
       addActivityLog: jest.fn(),
       addStageHistory: jest.fn(),
       updateJob: jest.fn(),
