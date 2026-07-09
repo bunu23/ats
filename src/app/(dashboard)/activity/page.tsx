@@ -235,7 +235,13 @@ interface AccordionProps {
   defaultOpen?: boolean;
 }
 
-const Accordion: React.FC<AccordionProps> = ({ title, items, expandedId, setExpandedId, defaultOpen = false }) => {
+const Accordion: React.FC<AccordionProps> = ({
+  title,
+  items,
+  expandedId,
+  setExpandedId,
+  defaultOpen = false
+}) => {
   const [isOpen, setIsOpen] = useState<boolean>(defaultOpen);
 
   return (

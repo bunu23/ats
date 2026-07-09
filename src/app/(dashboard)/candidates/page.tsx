@@ -383,7 +383,9 @@ export default function Candidates() {
                 type="number"
                 min="0"
                 value={formData.experience_years}
-                onChange={e => setFormData({ ...formData, experience_years: parseInt(e.target.value) || 0 })}
+                onChange={e =>
+                  setFormData({ ...formData, experience_years: parseInt(e.target.value) || 0 })
+                }
                 required
                 style={{
                   padding: '0.75rem',
