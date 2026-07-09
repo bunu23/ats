@@ -1,4 +1,4 @@
-# 🚀 Autonomous Applicant Tracking System (ATS)
+# Autonomous Applicant Tracking System (ATS)
 
 An intelligent, autonomous Applicant Tracking System built with Next.js 16 and 100% strict TypeScript, designed to automate recruitment workflows using AI evaluation, state machines, and background event dispatchers.
 
@@ -12,20 +12,21 @@ This Next-Gen ATS removes the manual overhead of moving candidates through a pip
 
 ## 📚 Documentation
 
-Before diving into the codebase, we highly recommend reviewing the detailed documentation to understand the underlying architecture and capabilities:
+Before diving into the codebase, I highly recommend reviewing the detailed documentation to understand the underlying architecture and capabilities:
 
-- [**Architecture & Design Patterns**](docs/ARCHITECTURE.md): Learn about our layered architecture, event-driven engine, and AI strategies.
+- [**Architecture & Design Patterns**](docs/ARCHITECTURE.md): Learn about layered architecture, event-driven engine, and AI strategies.
 - [**Core Capabilities**](docs/CORE_CAPABILITIES.md): A deep dive into the automated workflows, AI evaluations, and dynamic SLA guardrails.
-- [**Demo Runbook**](docs/DEMO_RUNBOOK.md): Step-by-step instructions for testing automated features (like the Stale Sweeper) locally.
-- [**Wiki / Database Models**](docs/WIKI.md): Understand the core Prisma entities and how the `worker.ts` background processor operates.
-- [**Future Enhancements**](docs/FUTURE_ENHANCEMENTS.md): Our roadmap for taking this prototype to an enterprise-grade SaaS product.
+- [**Demo Runbook**](docs/DEMO_RUNBOOK.md): Step-by-step instructions for testing automated features locally.
+- [**Wiki**](docs/WIKI.md): Internal Engineering documentation detailing the system architecture, background processors, and defensive guardrails.
+- [**Future Enhancements**](docs/FUTURE_ENHANCEMENTS.md): roadmap for taking this prototype to an enterprise-grade SaaS product.
 
 ## ⚡ Quick Start Guide
 
 ### Prerequisites
 
 - Node.js (v18+)
-- npm or yarn
+- npm (recommended package manager)
+- Docker Desktop (Required to run PostgreSQL and Redis locally)
 
 ### Installation & Setup
 
@@ -97,4 +98,4 @@ This repository enforces strict quality and formatting standards via Husky pre-c
 - **Unit Testing:** `npm run test` (Jest test suite configured in `jest.config.mjs`, covering core Automation Engine logic in `__tests__/`)
 - **E2E Testing:** `npm run test:e2e` (Playwright test suite validating frontend Kanban board drag-and-drop workflows)
 
-The `lint-staged` hook automatically runs `eslint --fix` and `prettier --write` against staged `.js`, `.jsx`, `.mjs`, `.json`, `.css`, and `.md` files before every commit.
+The `lint-staged` hook automatically runs `eslint --fix` and `prettier --write` against staged `.ts`, `.tsx`, `.js`, `.jsx`, `.mjs`, `.json`, `.css`, and `.md` files before every commit.
