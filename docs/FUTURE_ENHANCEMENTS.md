@@ -4,8 +4,6 @@ This document tracks identified gaps and areas for future investment to elevate 
 
 ## 1. Infrastructure & Reliability Scaling
 
-- **PostgreSQL Migration:** Transition the database from the local SQLite file (`prisma/dev.db`) to a managed PostgreSQL cluster (e.g., Supabase, Neon, or AWS RDS) to support distributed, multi-node production deployments.
-- **Message Broker Upgrade:** Replace the current `setInterval` polling loop in `worker.js` with a dedicated distributed message broker (e.g., Redis, RabbitMQ, or Apache Kafka) to guarantee delivery, manage retries, and ensure massive horizontal scalability for delayed tasks.
 - **TypeScript Migration:** Migrate the entire codebase from plain JavaScript to TypeScript to rigorously type Prisma database payloads and Next.js API responses, drastically reducing runtime errors.
 
 ## 2. AI-Assisted Job Creation

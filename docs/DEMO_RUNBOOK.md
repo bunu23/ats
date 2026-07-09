@@ -106,12 +106,12 @@ To prove that the AI isn't operating in a "black box," you can show stakeholders
 
 ## 🧹 Troubleshooting & Resetting
 
-If you want to run the demo again from a perfectly clean slate:
+If you wish to completely wipe the database and start the demo from scratch, follow these steps:
 
-1. Stop the application server (`Ctrl + C`).
-2. Delete the local SQLite database file: `rm prisma/dev.db`
-3. Push the Prisma schema to generate a fresh database:
-   ```bash
-   npx prisma db push
-   ```
-4. Restart the application (`npm run dev`). The system will automatically detect the empty database and run the `seed.js` script to populate a fresh set of dummy jobs and candidates!
+1. Stop the Next.js server and `worker.ts`.
+2. Tear down the database containers and volumes: `docker-compose down -v`
+3. Bring the clean database back up: `docker-compose up -d`
+4. Run the Prisma push command: `npx prisma db push`
+   - _Note: This automatically runs the `seed.ts` script to populate dummy jobs and candidates._
+5. Inject the default email templates: `node scripts/add-email-templates.mjs`
+6. Restart the Next.js server (`npm run dev`) and `worker.ts`.

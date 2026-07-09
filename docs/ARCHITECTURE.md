@@ -14,8 +14,8 @@ The codebase is strictly divided into functional layers to ensure maintainabilit
   The "brain" of the ATS. It handles workflow orchestration, evaluates active automation rules, and decides _when_ to trigger AI actions based on system events.
 - **Service Layer (`src/lib/ai-service.js`)**:
   Contains the isolated logic for interacting with external AI models (Claude). It formats prompts, structures context, and parses JSON responses from the LLM.
-- **Data Access Layer (`src/lib/db.js`)**:
-  Implements the Repository pattern. It abstracts away the underlying database operations using **Prisma ORM** backed by an SQLite database (`prisma/dev.db`). It orchestrates complex transactions, such as deep cascading deletes for candidates. Because of this abstraction, the underlying database can be seamlessly swapped to PostgreSQL by simply updating the connection string.
+- **Data Access Layer (`src/lib/db.ts`)**:
+  Implements the Repository pattern. It abstracts away the underlying database operations using **Prisma ORM** backed by a **PostgreSQL** database running in Docker. It orchestrates complex transactions, such as deep cascading deletes for candidates.
 
 ## 2. Event-Driven Architecture
 
@@ -56,15 +56,13 @@ By placing the AI capabilities and project context into the `.agents/skills/` di
 
 ### Dependency Injection (DI)
 
-The Automation Engine utilizes a lightweight form of constructor/parameter injection. Functions like `processStageChange(db, applicationId, newStage)` expect the `db` instance to be injected as an argument. This completely decouples the business logic from the file system, allowing the test suite (Jest) to inject a stateless mock and run assertions without corrupting the real SQLite file.
+The Automation Engine utilizes a lightweight form of constructor/parameter injection. Functions like `processStageChange(db, applicationId, newStage)` expect the `db` instance to be injected as an argument. This completely decouples the business logic from the file system, allowing the test suite (Jest) to inject a stateless mock and run assertions without corrupting the database.
 
 ## 5. Known Limitations & Technical Debt
 
 While robust for MVP and mid-market use cases, the current architecture has the following limitations:
 
-- **Local SQLite Database**: While Prisma provides an excellent ORM layer, the underlying database is currently a local SQLite file (`prisma/dev.db`). This works perfectly for a single instance but will require migration to a networked database for multi-node deployments.
-- **TypeScript Adoption**: The project is currently plain JavaScript. Migrating to TypeScript is highly recommended to strictly type database objects via Prisma and define clear API payloads.
-- **Polling Worker:** The `worker.js` (imported via `db.js`) relies on a `setInterval` loop to scan for delayed tasks. A dedicated message broker (like Redis or RabbitMQ) would be vastly more efficient and reliable at scale.
+- **TypeScript Adoption**: The core backend (queue, db, automation-engine) uses TypeScript, but the frontend is currently JavaScript. Fully migrating the frontend to TypeScript is highly recommended.
 - **Frontend State Management**: State is currently managed locally via React `useState` and manual API refetching. Introducing React Query (TanStack Query) or SWR would optimize caching and real-time data synchronization.
 
 ## 6. Next Steps

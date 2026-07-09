@@ -22,11 +22,11 @@ Business logic is decoupled from the Next.js API routes into dedicated singleton
 - **`db.js`**: Prisma client instantiation and database utilities.
 - **`ai-service.js`**: Adapters for interfacing with LLMs (e.g., Anthropic's Claude) vs local mock engines.
 - **`automation-engine.js`**: Evaluates stage transitions against the `AutomationRule` database table and dispatches consequences.
-- **`worker.js`**: A background processor that polls the `DelayedTask` table for time-deferred executions (e.g., delayed rejection emails).
+- **`worker.ts`**: A background processor powered by BullMQ that processes time-deferred and immediate background jobs via Redis queues.
 
 ### Data Persistence
 
-Powered by **SQLite** and **Prisma ORM** (`prisma/schema.prisma`). Core entities include `User`, `Job`, `Candidate`, `Application`, `StageHistory`, `ActivityLog`, `AutomationRule`, and `DelayedTask`.
+Powered by **PostgreSQL** and **Prisma ORM** (`prisma/schema.prisma`). Core entities include `User`, `Job`, `Candidate`, `Application`, `StageHistory`, `ActivityLog`, `AutomationRule`, and `Settings`.
 
 ---
 
@@ -57,7 +57,7 @@ Because the ATS handles autonomous communication, strict guardrails and defensiv
 
 To prevent long-running AI evaluations from blocking API responses, time-intensive operations are offloaded:
 
-- `worker.js` constantly polls the `DelayedTask` table for records where `execute_at <= now()`.
+- `worker.ts` processes BullMQ jobs dispatched by the engine to schedule background tasks.
 - Tasks have dedicated `payload` JSON schemas and are wrapped in `try/catch` blocks that log failures gracefully into the `ActivityLog` without crashing the main application.
 
 ### Stage Guardrails

@@ -4,7 +4,7 @@ This document outlines how our Applicant Tracking System meets and exceeds moder
 
 ## 1. Automated Efficiency & Pipeline Management
 
-- **Event-Driven Background Worker:** Complex tasks (like dispatching emails, scheduling delays, and executing SLA checks) are offloaded to an asynchronous Node.js worker process (`worker.js`). This transforms manual hiring processes into automated workflows, ensuring no candidate falls through the cracks while keeping the UI lightning fast.
+- **Event-Driven Background Worker:** Complex tasks (like dispatching emails, scheduling delays, and executing SLA checks) are offloaded to an asynchronous Node.js worker process (`worker.ts`) powered by BullMQ and Redis. This transforms manual hiring processes into automated workflows, ensuring no candidate falls through the cracks while keeping the UI lightning fast.
 - **Dynamic SLA Configuration:** Recruiters can globally configure the exact timeout windows for the Stale Sweeper (e.g., how many days a candidate is allowed to sit in the "Interview" stage) directly from the `/settings` UI dashboard. The background worker instantly adopts these rules in real-time.
 - **Zero-Friction Progression:** Features an intuitive drag-and-drop Kanban board for immediate pipeline visualization and progression.
 - **Safety Guardrails:** Human-in-the-loop checkpoints explicitly block the AI from automatically generating sensitive communications like Offer Letters or late-stage rejection emails, demanding human intervention at crucial Phase 5 moments.
@@ -28,7 +28,7 @@ This document outlines how our Applicant Tracking System meets and exceeds moder
 
 ## 5. Enterprise-Grade Data Integrity
 
-- **Relational Database Engine:** Upgraded from a flat JSON file system to a robust SQLite relational database managed via **Prisma ORM**. This ensures ACID compliance, enables complex cascading deletes, and enforces strict foreign key constraints across candidates, applications, and jobs.
+- **Relational Database Engine:** Uses a robust PostgreSQL relational database managed via **Prisma ORM**. This ensures ACID compliance, enables complex cascading deletes, and enforces strict foreign key constraints across candidates, applications, and jobs.
 - **Seamless Scalability:** The Data Access Layer abstracts the database implementation, allowing the entire application to be migrated to a managed PostgreSQL instance simply by updating the Prisma connection string, with zero changes required to business logic.
 
 ---
@@ -53,11 +53,10 @@ Our automation engine is explicitly tuned to follow (and exceed) standard recrui
 To verify the SLA automation yourself without waiting days, you can "time travel" the data in the database:
 
 1. **Test the Stale Sweeper (e.g. Applied > 14 Days):**
-   - Open the database via Prisma Studio (`npx prisma studio`) or manually edit `prisma/dev.db`.
-   - Find an active `Application` currently in the `"Applied"` stage.
-   - Edit the `stage_entered_at` timestamp to be **15 days in the past**.
-   - Watch your `worker.js` terminal logs. Within 60 seconds, you will see `Auto-Rejected (Stale)` and the candidate will receive a courteous email.
-2. **Test the Offer Expiration Reminder (48 hours before):**
-   - Move a candidate to the `"Offer"` stage.
-   - Modify the `stage_entered_at` to **3 days ago**.
-   - When `worker.js` loops, it calculates they are 48 hours away from the default 5-day expiration and will automatically dispatch the `Offer Expiration Reminder` to the Activity Dashboard!
+   - Open the database via Prisma Studio (`npx prisma studio`) or connect to the PostgreSQL container.
+   - Using your preferred database viewer, set the `stage_entered_at` timestamp for one of these candidates to **15 days ago**.
+   - Watch your `worker.ts` terminal logs. Within 60 seconds, you will see `Auto-Rejected (Stale)` and the candidate will receive a courteous email.
+
+2. **Escalation SLAs**
+   - Create a candidate in the **Offer** stage, and set their `stage_entered_at` to **4 days ago**.
+   - When `worker.ts` runs the SLA check, it calculates they are 48 hours away from the default 5-day expiration and will automatically dispatch the `Offer Expiration Reminder` to the Activity Dashboard!

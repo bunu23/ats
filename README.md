@@ -25,10 +25,11 @@ This Next-Gen ATS removes the manual overhead of moving candidates through a pip
    npm install
    ```
 
-2. **Database Setup**
-   The project uses SQLite and Prisma for persistence.
+2. **Database & Cache Setup (Docker)**
+   The project uses PostgreSQL and Redis for persistence and queues, orchestrated via Docker.
 
    ```bash
+   docker-compose up -d
    npx prisma db push
    # A seed script will run automatically to populate dummy jobs and candidates
    ```
@@ -36,6 +37,8 @@ This Next-Gen ATS removes the manual overhead of moving candidates through a pip
 3. **Run the Development Server & Background Worker**
    ```bash
    npm run dev
+   # In a separate terminal, run the BullMQ worker:
+   npx tsx worker.ts
    ```
    Navigate to `http://localhost:3000` to enter the Recruiter Dashboard.
 
@@ -47,8 +50,8 @@ The ATS architecture bridges a vertical backend automation engine with a horizon
 
 1. **Ingestion (`/api/apply`):** Resumes are parsed via `src/lib/ai-service.js`.
 2. **AI Evaluation:** AI generates a 100-point fit score and detailed reasoning.
-3. **Knockout Rules:** `AutomationRule` models evaluate the score.
-4. **Event Dispatch:** `src/lib/automation-engine.js` creates `ActivityLog` entries and queues `DelayedTask` items (e.g., sending emails via a background worker).
+3. **Knockout Rules:** `AutomationRule` models evaluate the score dynamically.
+4. **Event Dispatch:** `src/lib/automation-engine.ts` creates `ActivityLog` entries and queues BullMQ jobs (e.g., sending emails via the background worker).
 
 **Horizontal Recruiter Workspace (Frontend Pipeline)**
 
@@ -70,8 +73,9 @@ AI_PROVIDER=mock
 # Anthropic API Key (Required if AI_PROVIDER='claude')
 ANTHROPIC_API_KEY=your_anthropic_api_key_here
 
-# Optional Database Override (defaults to file:./dev.db in Prisma)
+# Optional Database Override (defaults to postgresql://postgres:postgres@localhost:5432/ats in Prisma)
 # DATABASE_URL=
+# REDIS_URL=
 ```
 
 ## 🛡️ Quality Gates
