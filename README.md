@@ -1,6 +1,6 @@
 # 🚀 Autonomous Applicant Tracking System (ATS)
 
-An intelligent, autonomous Applicant Tracking System built with Next.js 16, designed to automate recruitment workflows using AI evaluation, state machines, and background event dispatchers.
+An intelligent, autonomous Applicant Tracking System built with Next.js 16 and 100% strict TypeScript, designed to automate recruitment workflows using AI evaluation, state machines, and background event dispatchers.
 
 ## 📖 Project Overview
 
@@ -58,7 +58,7 @@ The ATS architecture bridges a vertical backend automation engine with a horizon
 
 **Vertical Automation Engine (Backend)**
 
-1. **Ingestion (`/api/apply`):** Resumes are parsed via `src/lib/ai-service.js`.
+1. **Ingestion (`/api/apply`):** Resumes are parsed via `src/lib/ai-service.ts`.
 2. **AI Evaluation:** AI generates a 100-point fit score and detailed reasoning.
 3. **Knockout Rules:** `AutomationRule` models evaluate the score dynamically.
 4. **Event Dispatch:** `src/lib/automation-engine.ts` creates `ActivityLog` entries and queues BullMQ jobs (e.g., sending emails via the background worker).
