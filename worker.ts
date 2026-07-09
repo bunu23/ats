@@ -1,11 +1,11 @@
+import { Worker } from 'bullmq';
+import IORedis from 'ioredis';
 import {
   getAllApplications,
   getJobById,
   updateApplicationData,
   updateApplicationStage,
   addActivityLog,
-  getAndClearPendingTasks,
-  removeDelayedTasksByApplication,
   getSettings
 } from './src/lib/db.js';
 
@@ -32,52 +32,64 @@ async function sendCourteousRejection(app, reason) {
   });
 }
 
-setInterval(async () => {
-  const now = new Date();
-  console.log(`[${now.toISOString()}] Running periodic checks...`);
+const redisConnection = new IORedis(process.env.REDIS_URL || 'redis://localhost:6380', {
+  maxRetriesPerRequest: null
+});
 
-  // 1. Process Delayed Tasks (Phase 1 Delayed Rejections, etc)
-  const pendingTasks = await getAndClearPendingTasks();
-  for (const task of pendingTasks) {
-    if (task.type === 'delayed_rejection') {
-      const p = task.payload;
+const queueWorker = new Worker('atsQueue', async (job) => {
+  const p = job.data;
+  console.log(`Processing ${job.name} for candidate ${p.candidateName}`);
 
-      // Ensure application wasn't moved or already rejected in the meantime
-      const apps = await getAllApplications();
-      const currentApp = apps.find(a => a.id === p.applicationId);
+  if (job.name === 'delayed_rejection') {
+    const apps = await getAllApplications();
+    const currentApp = apps.find(a => a.id === p.applicationId);
 
-      if (currentApp && currentApp.stage !== 'Rejected' && currentApp.stage !== 'Archived') {
-        await updateApplicationStage(
-          p.applicationId,
-          'Rejected',
-          'system',
-          'Delayed rejection executed (48h)'
-        );
-        await addActivityLog({
-          type: 'email_sent',
-          title: `Delayed Rejection Sent: ${p.candidateName}`,
-          description: `Dear ${p.candidateName}, thank you for your patience. After reviewing your application, we have decided to proceed with other candidates whose profiles more closely match our current needs for the ${p.jobTitle} position.`,
-          metadata: { to: p.email, automated: true },
-          application_id: p.applicationId,
-          job_id: p.job_id,
-          candidate_id: p.candidate_id
-        });
-      }
-    }
-    // Phase 3: Post-Interview Note
-    else if (task.type === 'post_interview_note') {
-      const p = task.payload;
+    if (currentApp && currentApp.stage !== 'Rejected' && currentApp.stage !== 'Archived') {
+      await updateApplicationStage(
+        p.applicationId,
+        'Rejected',
+        'system',
+        'Delayed rejection executed (48h)'
+      );
       await addActivityLog({
         type: 'email_sent',
-        title: `Post-Interview Thank You: ${p.candidateName}`,
-        description: `Dear ${p.candidateName}, thank you for your time today! Our team really enjoyed speaking with you. We are currently consolidating our reviews and will be in touch with next steps shortly.`,
+        title: `Delayed Rejection Sent: ${p.candidateName}`,
+        description: `Dear ${p.candidateName}, thank you for your patience. After reviewing your application, we have decided to proceed with other candidates whose profiles more closely match our current needs for the ${p.jobTitle} position.`,
         metadata: { to: p.email, automated: true },
         application_id: p.applicationId,
         job_id: p.job_id,
         candidate_id: p.candidate_id
       });
     }
+  } else if (job.name === 'candidate_reminder_24h' || job.name === 'candidate_reminder_12h') {
+      await addActivityLog({
+        type: 'email_sent',
+        title: `Interview Reminder: ${p.candidateName}`,
+        description: `Dear ${p.candidateName}, friendly reminder that your interview for ${p.jobTitle} is scheduled for ${p.interviewTime}. We look forward to seeing you.`,
+        metadata: { to: p.email, automated: true },
+        application_id: p.applicationId,
+        job_id: p.job_id,
+        candidate_id: p.candidate_id
+      });
+  } else if (job.name === 'recruiter_reminder_24h') {
+      await addActivityLog({
+        type: 'notification',
+        title: `Recruiter Reminder: Upcoming Interview`,
+        description: `Reminder: You have an interview scheduled with ${p.candidateName} for ${p.jobTitle} at ${p.interviewTime}.`,
+        metadata: { automated: true },
+        application_id: p.applicationId,
+        job_id: p.job_id,
+        candidate_id: p.candidate_id
+      });
   }
+}, { connection: redisConnection as any });
+
+queueWorker.on('completed', job => console.log(`Job ${job.id} completed.`));
+queueWorker.on('failed', (job, err) => console.error(`Job ${job.id} failed:`, err));
+
+setInterval(async () => {
+  const now = new Date();
+  console.log(`[${now.toISOString()}] Running periodic checks...`);
 
   // 2. Process SLAs and Time-Based Application Rules
   const applications = await getAllApplications();
@@ -96,7 +108,7 @@ setInterval(async () => {
     if (!job || job.status === 'Closed') continue;
 
     const enteredAt = new Date(app.stage_entered_at);
-    const daysInStage = (now - enteredAt) / (1000 * 60 * 60 * 24);
+    const daysInStage = (now.getTime() - enteredAt.getTime()) / (1000 * 60 * 60 * 24);
 
     // Check SLA
     const slaLimit = job.slas?.[app.stage];
@@ -184,23 +196,10 @@ setInterval(async () => {
     if (app.stage === 'Interview' && app.interview_date) {
       const interviewDate = new Date(app.interview_date);
       // Hours from NOW until the interview (- means in the past)
-      const hoursUntil = (interviewDate - now) / (1000 * 60 * 60);
+      const hoursUntil = (interviewDate.getTime() - now.getTime()) / (1000 * 60 * 60);
 
-      // PHASE 2: The "24-Hour Reminder" with prep tips
-      if (hoursUntil > 0 && hoursUntil <= 24 && !app.reminded_24h) {
-        await updateApplicationData(app.id, { reminded_24h: true });
-        await addActivityLog({
-          type: 'email_sent',
-          title: `Interview Reminder (24h): ${app.candidate_name}`,
-          description: `Dear ${app.candidate_name}, friendly reminder that your interview is tomorrow! Preparation tip: Make sure to review our recent product launch. Tech-check link: meet.google.com/test. We look forward to seeing you.`,
-          metadata: { to: app.candidate_email, automated: true },
-          application_id: app.id,
-          job_id: app.job_id,
-          candidate_id: app.candidate_id
-        });
-      }
       // 1-Hour Reminder
-      else if (hoursUntil > 0 && hoursUntil <= 1 && !app.reminded_1h) {
+      if (hoursUntil > 0 && hoursUntil <= 1 && !app.reminded_1h) {
         await updateApplicationData(app.id, { reminded_1h: true });
         await addActivityLog({
           type: 'email_sent',

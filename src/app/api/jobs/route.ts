@@ -1,6 +1,6 @@
 export const dynamic = 'force-dynamic';
 import { NextResponse } from 'next/server';
-import { getAllJobs, createJob } from '../../../lib/db.js';
+import { getAllJobs, createJob } from '../../../lib/db';
 
 export async function GET(request) {
   try {

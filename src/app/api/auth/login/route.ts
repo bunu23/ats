@@ -1,6 +1,6 @@
 export const dynamic = 'force-dynamic';
 import { NextResponse } from 'next/server';
-import { getUserByCredentials } from '../../../../lib/db.js';
+import { getUserByCredentials } from '../../../../lib/db';
 import { cookies } from 'next/headers';
 
 export async function POST(request) {

@@ -1,6 +1,6 @@
 export const dynamic = 'force-dynamic';
 import { NextResponse } from 'next/server';
-import { updateJob } from '../../../../lib/db.js';
+import { updateJob } from '../../../../lib/db';
 
 export async function PATCH(request, { params }) {
   try {
@@ -14,7 +14,7 @@ export async function PATCH(request, { params }) {
     // Auto-migrate orphaned candidates
     if (data.custom_stages && data.custom_stages.length > 0) {
       const validStages = data.custom_stages;
-      const db = require('../../../../lib/db.js');
+      const db = require('../../../../lib/db');
 
       const jobApps = (await db.getAllApplications()).filter(a => a.job_id === id);
       for (const app of jobApps) {

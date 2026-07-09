@@ -1,7 +1,7 @@
-import { processStageChange, processNewApplication } from '../src/lib/automation-engine.js';
+import { processStageChange, processNewApplication } from '../src/lib/automation-engine';
 
 // Mock the AI service
-jest.mock('../src/lib/ai-service.js', () => ({
+jest.mock('../src/lib/ai-service', () => ({
   scoreCandidate: jest.fn().mockResolvedValue({
     overallScore: 5,
     recommendation: 'Needs review'
@@ -9,7 +9,13 @@ jest.mock('../src/lib/ai-service.js', () => ({
   generateFollowUpEmail: jest.fn()
 }));
 
-import { scoreCandidate } from '../src/lib/ai-service.js';
+// Mock the queue
+jest.mock('../src/lib/queue', () => ({
+  atsQueue: { add: jest.fn() }
+}));
+
+import { scoreCandidate } from '../src/lib/ai-service';
+import { atsQueue } from '../src/lib/queue';
 
 describe('Automation Engine', () => {
   let mockDb;
@@ -62,8 +68,7 @@ describe('Automation Engine', () => {
       ]),
       addActivityLog: jest.fn(),
       addStageHistory: jest.fn(),
-      addDelayedTask: jest.fn(),
-      removeDelayedTasksByApplication: jest.fn(),
+      updateJob: jest.fn(),
       updateJob: jest.fn(),
       updateApplicationStage: jest.fn(),
       updateApplicationData: jest.fn(),
@@ -139,8 +144,10 @@ describe('Automation Engine', () => {
       expect(results).toEqual(
         expect.arrayContaining([expect.objectContaining({ action: 'delayed_rejection_queued' })])
       );
-      expect(mockDb.addDelayedTask).toHaveBeenCalledWith(
-        expect.objectContaining({ type: 'delayed_rejection' })
+      expect(atsQueue.add).toHaveBeenCalledWith(
+        'delayed_rejection',
+        expect.objectContaining({ applicationId: 'app-1' }),
+        expect.any(Object)
       );
     });
   });

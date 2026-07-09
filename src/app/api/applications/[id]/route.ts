@@ -1,9 +1,9 @@
 import { NextResponse } from 'next/server';
-import * as db from '../../../../lib/db.js';
+import * as db from '../../../../lib/db';
 import {
   processStageChange,
   scheduleInterviewReminders
-} from '../../../../lib/automation-engine.js';
+} from '../../../../lib/automation-engine';
 
 export async function PATCH(request, { params }) {
   try {

@@ -387,7 +387,7 @@ export async function getSettings() {
 }
 
 export async function updateSettings(fields) {
-  let data = {};
+  let data: any = {};
   if (fields.email_templates) data.email_templates = JSON.stringify(fields.email_templates);
   if (fields.recruiter_settings)
     data.recruiter_settings = JSON.stringify(fields.recruiter_settings);
@@ -399,4 +399,4 @@ export async function updateSettings(fields) {
   return await getSettings();
 }
 
-import './worker.js';
+

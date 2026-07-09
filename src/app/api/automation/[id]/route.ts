@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { toggleAutomationRule } from '../../../../lib/db.js';
+import { toggleAutomationRule } from '../../../../lib/db';
 
 export async function PATCH(request, { params }) {
   try {

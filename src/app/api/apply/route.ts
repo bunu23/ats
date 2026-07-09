@@ -1,7 +1,7 @@
 export const dynamic = 'force-dynamic';
 import { NextResponse } from 'next/server';
-import * as db from '../../../lib/db.js';
-import { processNewApplication } from '../../../lib/automation-engine.js';
+import * as db from '../../../lib/db';
+import { processNewApplication } from '../../../lib/automation-engine';
 
 export async function POST(request) {
   try {

@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
-import { scoreCandidate } from '../../../../lib/ai-service.js';
-import { getApplicationById, updateApplicationScore, addActivityLog } from '../../../../lib/db.js';
+import { scoreCandidate } from '../../../../lib/ai-service';
+import { getApplicationById, updateApplicationScore, addActivityLog } from '../../../../lib/db';
 
 export async function POST(request) {
   try {

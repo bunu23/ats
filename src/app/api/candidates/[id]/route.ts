@@ -1,6 +1,6 @@
 export const dynamic = 'force-dynamic';
 import { NextResponse } from 'next/server';
-import { deleteCandidate } from '../../../../lib/db.js';
+import { deleteCandidate } from '../../../../lib/db';
 
 export async function DELETE(request, { params }) {
   try {

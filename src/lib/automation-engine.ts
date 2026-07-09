@@ -1,5 +1,20 @@
-import { generateFollowUpEmail, scoreCandidate } from './ai-service.js';
+import { generateFollowUpEmail, scoreCandidate } from './ai-service';
+import { atsQueue } from './queue';
 
+async function removeDelayedBullMQ(applicationId, type = null) {
+  try {
+    const jobs = await atsQueue.getJobs(['delayed', 'waiting']);
+    for (const job of jobs) {
+      if (job.data.applicationId === applicationId) {
+        if (!type || job.name === type) {
+          await job.remove();
+        }
+      }
+    }
+  } catch (e) {
+    console.error('Error removing BullMQ jobs', e);
+  }
+}
 /**
  * Automation Engine
  *
@@ -131,7 +146,7 @@ export async function processStageChange(db, applicationId, fromStage, toStage) 
   // Late-Stage Rejection Guardrail
   else if (toStageLower === 'rejected' || toStageLower === 'archived') {
     // Clear any pending delayed rejections or tasks
-    await db.removeDelayedTasksByApplication(applicationId);
+    await removeDelayedBullMQ(applicationId);
 
     const isLateStage = job.custom_stages.indexOf(fromStage) > job.custom_stages.length / 2;
     if (isLateStage) {
@@ -318,18 +333,15 @@ export async function processNewApplication(db, applicationId) {
     else if (score.overallScore <= 59) {
       const executeAt = new Date(Date.now() + 48 * 60 * 60 * 1000).toISOString(); // 48 hours later
 
-      await db.addDelayedTask({
-        type: 'delayed_rejection',
-        execute_at: executeAt,
-        payload: {
-          applicationId: applicationId,
-          candidateName: application.candidate_name,
-          jobTitle: application.job_title,
-          email: application.candidate_email,
-          job_id: application.job_id,
-          candidate_id: application.candidate_id
-        }
-      });
+      const delayMs = new Date(executeAt).getTime() - Date.now();
+      await atsQueue.add('delayed_rejection', {
+        applicationId: applicationId,
+        candidateName: application.candidate_name,
+        jobTitle: application.job_title,
+        email: application.candidate_email,
+        job_id: application.job_id,
+        candidate_id: application.candidate_id
+      }, { delay: delayMs });
 
       await db.addActivityLog({
         type: 'delayed_rejection',
@@ -362,9 +374,9 @@ export async function processNewApplication(db, applicationId) {
 
 export async function scheduleInterviewReminders(db, application, interviewDateStr) {
   // Clear any existing reminders for this application
-  await db.removeDelayedTasksByApplication(application.id, 'candidate_reminder_24h');
-  await db.removeDelayedTasksByApplication(application.id, 'candidate_reminder_12h');
-  await db.removeDelayedTasksByApplication(application.id, 'recruiter_reminder_24h');
+  await removeDelayedBullMQ(application.id, 'candidate_reminder_24h');
+  await removeDelayedBullMQ(application.id, 'candidate_reminder_12h');
+  await removeDelayedBullMQ(application.id, 'recruiter_reminder_24h');
 
   if (!interviewDateStr) return;
 
@@ -376,54 +388,45 @@ export async function scheduleInterviewReminders(db, application, interviewDateS
   // Schedule Candidate 24h Reminder
   const cand24h = new Date(interviewDate.getTime() - 24 * 60 * 60 * 1000);
   if (cand24h > now) {
-    await db.addDelayedTask({
-      type: 'candidate_reminder_24h',
-      execute_at: cand24h.toISOString(),
-      payload: {
-        applicationId: application.id,
-        candidateName: application.candidate_name,
-        jobTitle: application.job_title,
-        email: application.candidate_email,
-        job_id: application.job_id,
-        candidate_id: application.candidate_id,
-        interviewTime: interviewDate.toLocaleString()
-      }
-    });
+    const delayMs = cand24h.getTime() - now.getTime();
+    await atsQueue.add('candidate_reminder_24h', {
+      applicationId: application.id,
+      candidateName: application.candidate_name,
+      jobTitle: application.job_title,
+      email: application.candidate_email,
+      job_id: application.job_id,
+      candidate_id: application.candidate_id,
+      interviewTime: interviewDate.toLocaleString()
+    }, { delay: delayMs });
   }
 
   // Schedule Candidate 12h Reminder
   const cand12h = new Date(interviewDate.getTime() - 12 * 60 * 60 * 1000);
   if (cand12h > now) {
-    await db.addDelayedTask({
-      type: 'candidate_reminder_12h',
-      execute_at: cand12h.toISOString(),
-      payload: {
-        applicationId: application.id,
-        candidateName: application.candidate_name,
-        jobTitle: application.job_title,
-        email: application.candidate_email,
-        job_id: application.job_id,
-        candidate_id: application.candidate_id,
-        interviewTime: interviewDate.toLocaleString()
-      }
-    });
+    const delayMs = cand12h.getTime() - now.getTime();
+    await atsQueue.add('candidate_reminder_12h', {
+      applicationId: application.id,
+      candidateName: application.candidate_name,
+      jobTitle: application.job_title,
+      email: application.candidate_email,
+      job_id: application.job_id,
+      candidate_id: application.candidate_id,
+      interviewTime: interviewDate.toLocaleString()
+    }, { delay: delayMs });
   }
 
   // Schedule Recruiter 24h Reminder
   const rec24h = new Date(interviewDate.getTime() - 24 * 60 * 60 * 1000);
   if (rec24h > now) {
-    await db.addDelayedTask({
-      type: 'recruiter_reminder_24h',
-      execute_at: rec24h.toISOString(),
-      payload: {
-        applicationId: application.id,
-        candidateName: application.candidate_name,
-        jobTitle: application.job_title,
-        email: application.candidate_email,
-        job_id: application.job_id,
-        candidate_id: application.candidate_id,
-        interviewTime: interviewDate.toLocaleString()
-      }
-    });
+    const delayMs = rec24h.getTime() - now.getTime();
+    await atsQueue.add('recruiter_reminder_24h', {
+      applicationId: application.id,
+      candidateName: application.candidate_name,
+      jobTitle: application.job_title,
+      email: application.candidate_email,
+      job_id: application.job_id,
+      candidate_id: application.candidate_id,
+      interviewTime: interviewDate.toLocaleString()
+    }, { delay: delayMs });
   }
 }

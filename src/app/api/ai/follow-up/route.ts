@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
-import { generateFollowUpEmail } from '../../../../lib/ai-service.js';
-import { getApplicationById } from '../../../../lib/db.js';
+import { generateFollowUpEmail } from '../../../../lib/ai-service';
+import { getApplicationById } from '../../../../lib/db';
 
 export async function POST(request) {
   try {
